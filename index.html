@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>قائمة تدقيق السلامة – نسخة ثابتة ومصححة</title>
+<style>
+  :root{--bg:#f7f8fb;--ink:#111;--muted:#666;--line:#e5e7eb;--card:#fff;--accent:#2563eb}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Kufi Arabic","Cairo",Tahoma,Arial,sans-serif}
+  .wrap{max-width:1100px;margin:auto;padding:20px}
+  .card{background:var(--card);border:1px solid #ddd;border-radius:14px;padding:20px}
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .logo{height:70px;object-fit:contain}
+  h1{margin:.2rem 0 1rem;font-size:22px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .btn{padding:8px 14px;border-radius:10px;cursor:pointer;margin:2px 0;font-size:14px;border:1px solid #ddd;background:#fff}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.warn{background:#fff3cd;border-color:#fcd34d}
+  label{display:block}
+  input[type="text"],input[type="search"],input[type="number"],input[type="color"],select{padding:6px 10px;border:1px solid #ccc;border-radius:10px}
+  input[type="text"],input[type="search"]{width:100%}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{border:1px solid #ccc;padding:8px;vertical-align:top}
+  th{background:#eef2ff}
+  [contenteditable]{outline:0;min-height:30px}
+  .muted{color:var(--muted);font-size:.9rem}
+  .grid{display:grid;gap:10px}
+  .grid-2{grid-template-columns:1fr 1fr}
+  .right{margin-inline-start:auto}
+  .sticky-head thead th{position:sticky;top:0;z-index:1}
+  .inline-help{font-size:.85rem;color:#555;margin-top:6px}
+  .sep{height:1px;background:#eee;margin:12px 0}
+  .tests{margin-top:12px;padding:10px;border:1px dashed #cbd5e1;border-radius:10px;background:#fafafa}
+  .rowlead{display:flex;align-items:center;gap:8px}
+  .ord{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:#eef2ff;font-weight:600}
+  tr.dragging{opacity:.6}
+  details summary{cursor:pointer}
+  dialog{border:1px solid #ddd;border-radius:12px;padding:0;max-width:720px;width:min(92vw,720px)}
+  .dlg-head{padding:12px 16px;border-bottom:1px solid #eee;font-weight:700}
+  .dlg-body{padding:12px 16px}
+  .dlg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .dlg-actions{padding:12px 16px;border-top:1px solid #eee;display:flex;gap:8px;justify-content:flex-end}
+  textarea{width:100%;height:220px;padding:10px;border:1px solid #ccc;border-radius:10px;resize:vertical}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#eef2ff;border:1px solid #c7d2fe;font-size:.8rem;color:#374151}
+  @media (max-width:720px){.grid-2{grid-template-columns:1fr}.dlg-grid{grid-template-columns:1fr}}
+  @media print{.no-print{display:none} body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card">
+    <div class="header">
+      <img id="companyLogo" src="" class="logo" alt="شعار الشركة" hidden>
+      <div>
+        <h1 id="title">قائمة تدقيق السلامة – </h1>
+        <div id="ref" class="muted"></div>
+      </div>
+      <button class="btn right no-print" id="printBtn">🖨️ طباعة / PDF</button>
+    </div>
+
+    <!-- أزرار اللغة والإجراءات -->
+    <div class="toolbar no-print">
+      <button class="btn" id="langAr">🇸🇦 عربي</button>
+      <button class="btn" id="langEn">🇬🇧 English</button>
+      <span style="flex:1"></span>
+      <label class="muted"><input type="checkbox" id="optAutoFill" checked> ⚡ تعبئة تلقائية للباب</label>
+      <button class="btn" id="saveDraft">💾 حفظ المسودة</button>
+      <button class="btn warn" id="clearDraft">🗑️ مسح المسودة</button>
+    </div>
+
+    <!-- بيانات رأسية -->
+    <div class="grid grid-2 no-print">
+      <label id="lblClient">اسم العميل:
+        <input id="client" type="text" placeholder="مثال: شركة الخليج للصناعات">
+      </label>
+      <label id="lblSite">اسم الموقع:
+        <input id="site" type="text" placeholder="مثال: مصنع المنطقة الصناعية – الشعيبة">
+      </label>
+      <label id="lblLogo">رفع الشعار:
+        <input id="logoInput" type="file" accept="image/*">
+      </label>
+      <label id="lblChapNo">رقم الباب:
+        <input id="chapterNo" type="text" inputmode="numeric" placeholder="مثال: ٤ أو 4">
+      </label>
+      <label id="lblChapName">اسم الباب:
+        <input id="chapterName" type="text" placeholder="مثال: تداول وتخزين المواد">
+      </label>
+      <div>
+        <label id="lblFilter">بحث داخل البنود:
+          <input id="filter" type="search" placeholder="اكتب كلمة للفلترة…">
+        </label>
+        <div class="inline-help" id="filterHelp">مثال: سقالات، مخارج الطوارئ، حواجز الآلات…</div>
+      </div>
+    </div>
+
+    <!-- قوالب وخيارات التصدير -->
+    <div class="toolbar no-print">
+      <span class="muted">📚 قوالب سريعة:</span>
+      <button class="btn" id="tplCh1">باب 1</button>
+      <button class="btn" id="tplCh2">باب 2</button>
+      <button class="btn" id="tplCh3">باب 3</button>
+      <button class="btn" id="tplCh4">باب 4</button>
+      <button class="btn" id="tplCh5">باب 5</button>
+      <button class="btn" id="tplCh6">باب 6</button>
+      <button class="btn" id="tplCh7">باب 7</button>
+      <button class="btn" id="tplCh8">باب 8</button>
+      <button class="btn" id="tplErgo">Ergonomic</button>
+      <span id="tplUserContainer" class="muted" style="display:flex;gap:6px;flex-wrap:wrap"></span>
+      <button class="btn" id="saveAsTemplate">💾 حفظ القائمة كقالب</button>
+      <button class="btn" id="pasteFromWord">📋 لصق من Word</button>
+      <span style="flex:1"></span>
+      <label class="muted"><input type="checkbox" id="optChecks" checked> أعمدة ✔/✖</label>
+      <label class="muted"><input type="checkbox" id="optRisk"> تقييم المخاطر (1–5)</label>
+      <label class="muted">إطار:
+        <input id="optBorderW" type="number" min="0" max="6" value="1" style="width:60px"> px
+        <input id="optBorderColor" type="color" value="#333333">
+      </label>
+      <label class="muted">حجم الشعار:
+        <input id="optLogoIn" type="number" min="0.8" max="2.0" step="0.1" value="1.3" style="width:70px"> in
+      </label>
+      <button class="btn" id="exportPdf">🧾 تصدير PDF</button>
+    </div>
+
+    <!-- أزرار التحكم بالبند -->
+    <div class="toolbar no-print">
+      <button class="btn" id="selectAll">تحديد الكل</button>
+      <button class="btn" id="clearAll">إلغاء التحديد</button>
+      <button class="btn" id="addRow">➕ إضافة بند</button>
+      <button class="btn" id="deleteChecked">🗑️ حذف البنود المحددة</button>
+      <span style="flex:1"></span>
+      <button class="btn" id="importJson">📥 استيراد JSON</button>
+      <button class="btn" id="exportJson">📤 تصدير JSON</button>
+      <button class="btn primary" id="exportHtml">⬇️ تصدير نسخة العميل (HTML)</button>
+    </div>
+
+    <!-- الجدول -->
+    <table id="tbl" class="sticky-head">
+      <thead>
+        <tr><th id="thSel">اختيار / رقم</th><th id="thItem">بند التدقيق</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="sep"></div>
+    <div class="muted no-print">تلميح: يمكنك لصق البنود من Word (📋)، وحفظها كقالب، <span class="pill">أو ربطها بباب</span> ليتم تعبئتها تلقائيًا. لا يتم حفظ اسم العميل/الموقع.</div>
+
+    <details class="tests no-print" open>
+      <summary>✅ اختبارات سريعة (Smoke Tests)</summary>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">
+        <button class="btn" id="btnRunTests">تشغيل الاختبارات</button>
+        <span class="pill">لن نعدّل أي اختبار موجود؛ سنضيف اختبارات فقط</span>
+      </div>
+      <pre id="testOut" class="muted" style="white-space:pre-wrap"></pre>
+    </details>
+  </section>
+</div>
+
+<!-- نافذة لصق من Word -->
+<dialog id="pasteDlg">
+  <div class="dlg-head">📋 لصق بنود من Word</div>
+  <div class="dlg-body">
+    <div class="dlg-grid">
+      <label>رقم الباب (اختياري):
+        <input id="dlgChapterNo" type="text" inputmode="numeric" placeholder="مثال: 4">
+      </label>
+      <label>اسم الباب (اختياري):
+        <input id="dlgChapterName" type="text" placeholder="مثال: تداول وتخزين المواد">
+      </label>
+    </div>
+    <label>الصق البنود هنا (سطر لكل بند):
+      <textarea id="dlgText" placeholder="1- البند الأول\n• البند الثاني\n- البند الثالث..."></textarea>
+    </label>
+    <div class="dlg-grid">
+      <label>طريقة الإدراج:
+        <select id="dlgMode">
+          <option value="replace">استبدال القائمة الحالية</option>
+          <option value="append">إضافة إلى القائمة الحالية</option>
+        </select>
+      </label>
+      <label>حفظ كقالب باسم (اختياري):
+        <input id="dlgTplName" type="text" placeholder="اسم القالب">
+      </label>
+    </div>
+    <div class="inline-help" style="margin:6px 0 10px">سيتم تجاهل الترقيم والرموز (• - 1) تلقائيًا.</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <label class="muted"><input type="checkbox" id="dlgBindChapter" checked> ربط كباب للتعبئة التلقائية</label>
+      <label class="muted"><input type="checkbox" id="dlgCopyToEn" checked> نسخ البنود للإنجليزية أيضًا</label>
+      <span class="pill">يفيد عند امتلاكك نص عربي فقط</span>
+    </div>
+  </div>
+  <div class="dlg-actions">
+    <button class="btn" id="dlgCancel" type="button">إلغاء</button>
+    <button class="btn primary" id="dlgApply" type="button">تطبيق</button>
+  </div>
+</dialog>
+
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    // ===== الحالة =====
+    let state = {
+      lang: 'ar',
+      logoDataURL: '',
+      chapter: { number: '', name: '' },
+      items: { ar: [], en: [] },
+      options: { includeChecks: true, includeRisk: false, borderW: 1, borderColor: '#333333', logoIn: 1.3, autoFill: true }
+    };
+
+    const LS_KEY_DRAFT = 'audit_generic_draft';
+    const LS_KEY_TPL = 'audit_user_templates_v1';
+    const LS_KEY_CHMAP = 'audit_chapter_templates_v1';
+
+    // ===== القوالب المدمجة =====
+    const templates = {
+      ar: {
+        ch1:[
+          "التأكد من وجود دليل إرشادي للسلامة مكتوب بالعربية ولغة يفهمها العمال",
+          "تحديد مخاطر العمل حسب طبيعة النشاط",
+          "تزويد الهيئة بالمخططات النهائية المعتمدة",
+          "إبلاغ وتدريب العمال على المخاطر والوقاية قبل مباشرة العمل",
+          "توفير معدات الوقاية الشخصية مجانًا وتدريب العمال على استخدامها",
+          "اعتماد لائحة جزاءات خاصة بمخالفات السلامة",
+          "وضع علامات إرشادية وتحذيرية واضحة وملصقات بلغة يفهمها العمال",
+          "تعيين مشرف/مراقب سلامة حسب حجم وخطورة المنشأة",
+          "تأهيل مشرف السلامة بشهادة وخبرة مناسبة",
+          "للمنشآت عالية الخطورة (300+ عامل): إنشاء قسم سلامة وصحة مهنية",
+          "تدريب دوري لمشرفي ومراقبي السلامة",
+          "إجراء تفتيش دوري وتسجيل الحوادث والإصابات",
+          "إخطار الهيئة بالحوادث الجسيمة خلال 24 ساعة",
+          "حفظ سجلات محدثة متاحة للمفتشين"
+        ],
+        ch2:["متانة المباني والأسقف","تجهيز ساحات العمل بمظلات/أسقف","ممرات واضحة ومخارج طوارئ آمنة","أرضيات سليمة ونظيفة وصرف مغطى","التخلص السليم من الفضلات والمواد الكيميائية","صيانة دورية للمباني والمرافق","وقاية من السقوط والأشياء المتساقطة والحفر","سلالم متينة غير زلقة ومزودة بحواجز","سقالات آمنة مع حواجز وتثبيت جيد","سندرات/منصات مرخصة وآمنة","عزل مصادر الغبار/الغازات مع شفط","فحص أوعية الضغط","أدوات صالحة ومحددة أماكنها","معدات إطفاء مناسبة وموزعة"],
+        ch3:["تدريب العمال على وقاية الآلات","لا تشغيل دون حواجز","عدم تعطيل أجهزة الوقاية","مسافة 60 سم حول الآلات","حواجز دائمة للأجزاء الخطرة","إزالة الحواجز فقط بعد الإيقاف","مفتاح إيقاف طارئ","صيانة دورية بسجلات","وقاية من الشرر والشظايا"],
+        ch4:[
+          "تداول المواد والخامات بطريقة آمنة لا تشكل خطراً على سلامة العاملين",
+          "استخدام معدات الرفع الميكانيكية المناسبة وصيانتها دورياً (تفتيش أسبوعي واختبار سنوي)",
+          "تثبيت لوحة تبين أقصى حمولة تشغيل مأمونة على كل آلة رفع",
+          "إعداد سجل خاص لكل آلة رفع يشمل بيانات الصنع، الحمل الأقصى، الفحص الدوري، الصيانة والإصلاحات",
+          "تزويد مشغّل آلة الرفع بوسيلة اتصال صالحة قبل بدء العمل",
+          "تحديد مسارات آلات الرفع بوسائل تحذير ومنع مرور الأشخاص أو وقوفهم تحت الأحمال المعلقة",
+          "تشغيل آلات الرفع والجر والنقل يقتصر على أشخاص مختصين ومؤهلين ومرخّصين",
+          "تأمين وسائل النقل الميكانيكية وإجراء فحص دوري لها وفقاً لمتطلبات السلامة",
+          "تخزين المواد والمعدات وفق أصول التخزين السليم، مع عزل المواد الخطرة في مخازن خاصة",
+          "وضع لافتات إرشادية على المخازن تبين درجة الخطورة وطرق التداول والنقل الآمن"
+        ],
+        ch5:["مفاتيح عزل آمنة وبأماكن ظاهرة","قواطع أوتوماتيكية للأعطال","لوحات توزيع في أماكن آمنة","عدم استخدام اللوحات للتخزين","عزل كامل للأسلاك والكابلات","فحص دوري ومعالجة فورية","عاملون مؤهلون","عزل التيار قبل الصيانة وتحذيرات","قفازات/أحذية عازلة ومنع المجوهرات","تأريض الستاتيك","معدات إطفاء حرائق كهربائية","فحوص طبية للعاملين بالكهرباء","لوحات تحذير واضحة"],
+        ch6:["إضاءة كافية ومتجانسة","الحد من الضوضاء/الاهتزازات","حرارة عمل ضمن الحدود","وقاية للعمال بالمواقع المكشوفة","تهوية كافية","حواجز حرارية للأفرن واللحام"],
+        ch7:["حدود التعرض للمواد الكيميائية","شفط/تهوية عند المصدر","استبدال ببدائل أقل خطراً","تمكين المفتش من بيانات المواد","تنظيف رطب/شفط دوري"],
+        ch8:["أماكن راحة/طعام وفق اشتراطات","غرف تبديل وخزائن","حمامات ومواد تنظيف","مياه شرب مبردة كافية","عدد كافٍ من دورات المياه","صرف صحي ملائم للمواقع النائية"],
+        ergo:["ارتفاع الطاولة مناسب","كرسي قابل للتعديل بدعم أسفل الظهر","مسافة رؤية الشاشة موصى بها","مناولة يدوية ضمن الحدود"]
+      },
+      en:{
+        ch1:["Safety manual available","Identify work hazards","Submit approved drawings","Train workers before work","Provide PPE free","Penalty policy","Clear safety signs","Appoint safety supervisor","Supervisor certified","High-risk: safety dept.","Regular training","Periodic inspections","Report serious accidents","Keep updated records"],
+        ch2:["Sound buildings/roofs","Yard shades/roofs","Marked passages & safe exits","Safe clean floors & drainage","Waste/chemicals disposal","Regular maintenance","Fall/excavation precautions","Sturdy non-slip ladders","Safe scaffolds with guardrails","Licensed safe platforms","Isolate dust/fumes with extraction","Inspect pressure vessels","Serviceable tools stored","Adequate extinguishers"],
+        ch3:["Train on machine guarding","No operation without guards","Do not disable guards","60 cm clearance","Permanent guards","Remove guards only when stopped","Emergency stop nearby","Regular maintenance records","No cleaning during operation","Protect from sparks/debris"],
+        ch4:[
+          "Materials and raw substances are handled safely without endangering workers",
+          "Proper lifting equipment is used and inspected weekly & tested at least annually",
+          "Maximum safe load is clearly displayed on each lifting machine",
+          "A logbook is maintained for each lifting machine (manufacture date, safe load, inspections, maintenance)",
+          "Lifting machine operator is provided with a working communication device before operation",
+          "Lifting paths are marked with warnings; no personnel are allowed under suspended loads",
+          "Only trained, licensed, and authorized personnel operate lifting/hauling/transport machines",
+          "Mechanical transport equipment is secured and regularly inspected per safety requirements",
+          "Materials are stored safely; hazardous substances are isolated in designated storage",
+          "Warning signs are posted on storage areas showing hazard level and safe handling methods"
+        ],
+        ch5:["Isolation switches","Automatic breakers","Safe distribution boards","No storage in panels","Insulated cables","Periodic inspection","Qualified electricians","Isolate power before maintenance","Insulated PPE; no jewelry","Static grounding","Electrical fire equipment","Medical exams","Warning signs"],
+        ch6:["Adequate lighting","Noise/vibration control","Safe work temperature","Outdoor worker protection","Adequate ventilation","Heat shields"],
+        ch7:["Within exposure limits","Extract at source","Substitute safer materials","Inspectors access chemicals","Wet/vacuum cleaning"],
+        ch8:["Rest/eating areas","Changing rooms","Showers with supplies","Safe cool drinking water","Sufficient toilets","Approved sewage for remote sites"],
+        ergo:["Desk height ok","Adjustable chair lumbar","Proper viewing distance","Manual handling within limits"]
+      }
+    };
+
+    // ===== عناصر DOM =====
+    const els = {
+      companyLogo: document.getElementById('companyLogo'),
+      logoInput: document.getElementById('logoInput'),
+      chapterNo: document.getElementById('chapterNo'),
+      chapterName: document.getElementById('chapterName'),
+      title: document.getElementById('title'),
+      ref: document.getElementById('ref'),
+      tbody: document.querySelector('#tbl tbody'),
+      filter: document.getElementById('filter'),
+      client: document.getElementById('client'),
+      site: document.getElementById('site'),
+      langAr: document.getElementById('langAr'),
+      langEn: document.getElementById('langEn'),
+      saveDraft: document.getElementById('saveDraft'),
+      clearDraft: document.getElementById('clearDraft'),
+      selectAll: document.getElementById('selectAll'),
+      clearAll: document.getElementById('clearAll'),
+      addRow: document.getElementById('addRow'),
+      deleteChecked: document.getElementById('deleteChecked'),
+      importJson: document.getElementById('importJson'),
+      exportJson: document.getElementById('exportJson'),
+      exportHtml: document.getElementById('exportHtml'),
+      exportPdf: document.getElementById('exportPdf'),
+      optChecks: document.getElementById('optChecks'),
+      optRisk: document.getElementById('optRisk'),
+      optBorderW: document.getElementById('optBorderW'),
+      optBorderColor: document.getElementById('optBorderColor'),
+      optLogoIn: document.getElementById('optLogoIn'),
+      optAutoFill: document.getElementById('optAutoFill'),
+      tplUserContainer: document.getElementById('tplUserContainer'),
+      saveAsTemplate: document.getElementById('saveAsTemplate'),
+      pasteFromWord: document.getElementById('pasteFromWord'),
+      tplCh1: document.getElementById('tplCh1'),
+      tplCh2: document.getElementById('tplCh2'),
+      tplCh3: document.getElementById('tplCh3'),
+      tplCh4: document.getElementById('tplCh4'),
+      tplCh5: document.getElementById('tplCh5'),
+      tplCh6: document.getElementById('tplCh6'),
+      tplCh7: document.getElementById('tplCh7'),
+      tplCh8: document.getElementById('tplCh8'),
+      tplErgo: document.getElementById('tplErgo'),
+      testOut: document.getElementById('testOut'),
+      btnRunTests: document.getElementById('btnRunTests'),
+      printBtn: document.getElementById('printBtn'),
+      dlg: document.getElementById('pasteDlg'),
+      dlgNo: document.getElementById('dlgChapterNo'),
+      dlgName: document.getElementById('dlgChapterName'),
+      dlgText: document.getElementById('dlgText'),
+      dlgMode: document.getElementById('dlgMode'),
+      dlgTplName: document.getElementById('dlgTplName'),
+      dlgBind: document.getElementById('dlgBindChapter'),
+      dlgCopyToEn: document.getElementById('dlgCopyToEn'),
+      dlgCancel: document.getElementById('dlgCancel'),
+      dlgApply: document.getElementById('dlgApply')
+    };
+
+    // ===== قوالب مخصّصة =====
+    function loadUserTemplates(){
+      try{ return JSON.parse(localStorage.getItem(LS_KEY_TPL)) || {ar:{},en:{}}; }
+      catch{ return {ar:{},en:{}}; }
+    }
+    function saveUserTemplates(obj){
+      try{ localStorage.setItem(LS_KEY_TPL, JSON.stringify(obj)); }
+      catch(e){ console.warn('save tpl failed', e); }
+    }
+    function renderUserTemplates(){
+      const store = loadUserTemplates();
+      els.tplUserContainer.innerHTML = '';
+      const map = store[state.lang] || {};
+      Object.keys(map).forEach(name=>{
+        const b = document.createElement('button');
+        b.className='btn'; b.textContent = `📄 ${name}`;
+        b.addEventListener('click', ()=>{
+          const isReplace = confirm('استبدال البنود الحالية بالقالب؟\nOK = استبدال\nCancel = إضافة');
+          applyTemplateFromArray(map[name], isReplace? 'replace':'append');
+        });
+        els.tplUserContainer.appendChild(b);
+      });
+    }
+
+    // ===== ربط الأبواب =====
+    function loadChapterMap(){ try{ return JSON.parse(localStorage.getItem(LS_KEY_CHMAP)) || {}; }catch{ return {}; } }
+    function saveChapterMap(map){ try{ localStorage.setItem(LS_KEY_CHMAP, JSON.stringify(map)); }catch(e){ console.warn('save chapter map failed', e); } }
+    const AR_DIGITS = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
+    function normalizeDigits(s){ return String(s||'').replace(/[٠-٩]/g, d=>AR_DIGITS[d]).replace(/[^0-9.]/g,'').trim(); }
+    function stripDiacritics(s){ return String(s||'').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g,''); }
+    function normalizeName(s){ return stripDiacritics(String(s||'').replace(/\u0640/g,'')).toLowerCase().replace(/[\s\-–—_]+/g,' ').trim(); }
+    function chapterKey(num,name){ const n=normalizeDigits(num); const nm=normalizeName(name); return n+'|'+nm; }
+
+    function setChapterTemplate(num,name, arrAr, arrEn){ const map = loadChapterMap(); const key = chapterKey(num,name); map[key] = { ar: (arrAr||[]), en: (arrEn||[]) }; saveChapterMap(map); }
+    function findChapterTemplate(num,name){
+      const map = loadChapterMap();
+      const n=normalizeDigits(num), nm=normalizeName(name);
+      const entries = Object.entries(map);
+      let hit = entries.find(([k])=>{const [kn,knm]=k.split('|'); return kn===n && knm===nm;});
+      if(hit) return hit[1];
+      if(n){ hit = entries.find(([k])=>k.split('|')[0]===n); if(hit) return hit[1]; }
+      if(nm){ hit = entries.find(([k])=>k.split('|')[1]===nm); if(hit) return hit[1]; }
+      if(n==='1') return { ar: templates.ar.ch1, en: templates.en.ch1 };
+      if(n==='2') return { ar: templates.ar.ch2, en: templates.en.ch2 };
+      if(n==='3') return { ar: templates.ar.ch3, en: templates.en.ch3 };
+      if(n==='4') return { ar: templates.ar.ch4, en: templates.en.ch4 };
+      if(n==='5') return { ar: templates.ar.ch5, en: templates.en.ch5 };
+      if(n==='6') return { ar: templates.ar.ch6, en: templates.en.ch6 };
+      if(n==='7') return { ar: templates.ar.ch7, en: templates.en.ch7 };
+      if(n==='8') return { ar: templates.ar.ch8, en: templates.en.ch8 };
+      if(nm.includes('تداول') || (nm.includes('تخزين') && nm.includes('مواد'))) return { ar: templates.ar.ch4, en: templates.en.ch4 };
+      if(nm.includes('احتياطات') && nm.includes('السلامة')) return { ar: templates.ar.ch2, en: templates.en.ch2 };
+      if(nm.includes('الحماية') && (nm.includes('الات') || nm.includes('الالات') || nm.includes('الآلات'))) return { ar: templates.ar.ch3, en: templates.en.ch3 };
+      if(nm.includes('الوقاية') && nm.includes('الكهرباء')) return { ar: templates.ar.ch5, en: templates.en.ch5 };
+      if(nm.includes('الوقاية') && nm.includes('المخاطر الطبيعية')) return { ar: templates.ar.ch6, en: templates.en.ch6 };
+      if(nm.includes('الوقاية') && nm.includes('المخاطر الكيميائية')) return { ar: templates.ar.ch7, en: templates.en.ch7 };
+      if(nm.includes('المرافق') && nm.includes('العامة')) return { ar: templates.ar.ch8, en: templates.en.ch8 };
+      if(nm.includes('ergonomic')) return { ar: templates.ar.ergo, en: templates.en.ergo };
+      if((nm.includes('handling') || nm.includes('storage')) && nm.includes('material')) return { ar: templates.ar.ch4, en: templates.en.ch4 };
+      if(nm.includes('safety') && nm.includes('health') && nm.includes('precautions')) return { ar: templates.ar.ch2, en: templates.en.ch2 };
+      if((nm.includes('machinery') || nm.includes('machine')) && (nm.includes('safety') || nm.includes('protection'))) return { ar: templates.ar.ch3, en: templates.en.ch3 };
+      if(nm.includes('electrical') && nm.includes('safety')) return { ar: templates.ar.ch5, en: templates.en.ch5 };
+      if(nm.includes('natural') && (nm.includes('hazard') || nm.includes('hazards'))) return { ar: templates.ar.ch6, en: templates.en.ch6 };
+      if((nm.includes('chemical') || nm.includes('hazardous')) && (nm.includes('safety') || nm.includes('substances'))) return { ar: templates.ar.ch7, en: templates.en.ch7 };
+      if(nm.includes('general facilities')) return { ar: templates.ar.ch8, en: templates.en.ch8 };
+      return null;
+    }
+
+    function tryAutoFillFromChapter(){
+      if(!state.options.autoFill) return;
+      const no = els.chapterNo.value.trim();
+      const nm = els.chapterName.value.trim();
+      const tpl = findChapterTemplate(no, nm);
+      if(tpl){ state.items.ar = (tpl.ar||[]).slice(); state.items.en = (tpl.en||[]).slice(); renderTable(); persist(); }
+    }
+
+    // ===== وظائف مساعدة =====
+    function multiMatch(text, query){ if(!query) return true; const parts = query.split(/\s+/).map(s=>s.trim().toLowerCase()).filter(Boolean); const t = String(text).toLowerCase(); return parts.every(p=>t.includes(p)); }
+
+    function renderTable(){
+      const list = state.items[state.lang] || [];
+      const q = els.filter.value.trim();
+      els.tbody.innerHTML = '';
+      list.forEach((txt, idx)=>{
+        if(q && !multiMatch(txt, q)) return;
+        const tr = document.createElement('tr');
+        tr.draggable = true; tr.dataset.row = idx;
+        const safe = String(txt||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        tr.innerHTML = `<td><div class="rowlead"><input type="checkbox" class="pick" checked aria-label="select"><span class="ord">${idx+1}</span></div></td>
+          <td contenteditable="true" data-index="${idx}">${safe}</td>`;
+        els.tbody.appendChild(tr);
+      });
+    }
+
+    function updateTitle(){
+      const no = els.chapterNo.value.trim();
+      let nm = els.chapterName.value.trim();
+      if(!no && !nm) nm = 'ergonomic';
+      if(state.lang==='ar'){
+        els.title.textContent = 'قائمة تدقيق السلامة – ' + (no? ('الباب ' + no + ' – ') : '') + (nm||'');
+        els.langAr.classList.add('primary'); els.langEn.classList.remove('primary');
+        document.documentElement.lang='ar'; document.documentElement.dir='rtl'; document.body.dir='rtl';
+      } else {
+        els.title.textContent = 'Safety Audit Checklist – ' + (no? ('Chapter ' + no + ' – ') : '') + (nm||'');
+        els.langEn.classList.add('primary'); els.langAr.classList.remove('primary');
+        document.documentElement.lang='en'; document.documentElement.dir='ltr'; document.body.dir='ltr';
+      }
+    }
+
+    function persist(){
+      const payload = { v:18, lang: state.lang, logoDataURL: state.logoDataURL, items: state.items, chapter: state.chapter, options: state.options };
+      try{ localStorage.setItem(LS_KEY_DRAFT, JSON.stringify(payload)); } catch(e){ console.warn('persist failed', e); }
+    }
+
+    function restore(){
+      const raw = localStorage.getItem(LS_KEY_DRAFT);
+      if(raw){
+        try{
+          const d = JSON.parse(raw);
+          if(d.lang) state.lang = d.lang;
+          if(d.logoDataURL){ state.logoDataURL = d.logoDataURL; els.companyLogo.src = d.logoDataURL; els.companyLogo.hidden = !d.logoDataURL; }
+          if(d.chapter) state.chapter = d.chapter;
+          if(d.items && d.items.ar && d.items.en) state.items = d.items;
+          if(d.options) state.options = Object.assign(state.options, d.options);
+        }catch(e){ console.warn('restore failed', e); }
+      }
+      els.chapterNo.value = state.chapter.number || '';
+      els.chapterName.value = state.chapter.name || '';
+      els.optChecks.checked = !!state.options.includeChecks;
+      els.optRisk.checked = !!state.options.includeRisk;
+      els.optBorderW.value = state.options.borderW;
+      els.optBorderColor.value = state.options.borderColor;
+      els.optLogoIn.value = state.options.logoIn;
+      els.optAutoFill.checked = !!state.options.autoFill;
+      if(state.logoDataURL){ els.companyLogo.hidden=false; els.companyLogo.src=state.logoDataURL; }
+      updateTitle(); renderTable(); renderUserTemplates();
+    }
+
+    function buildClientHTML(){
+      const no = els.chapterNo.value.trim();
+      const nm = els.chapterName.value.trim();
+      const t = (state.lang==='ar');
+      const opt = state.options;
+      const title = (t? 'قائمة تدقيق السلامة – ' : 'Safety Audit Checklist – ') + (no? (t? 'الباب '+no+' – ' : 'Chapter '+no+' – ') : '') + (nm||'');
+      const lblClient = t? 'اسم العميل:' : 'Client:';
+      const lblSite   = t? 'اسم الموقع:' : 'Site:';
+      const lblAud    = t? 'المدقق:' : 'Auditor:';
+      const lblNotes  = t? 'ملاحظات' : 'Notes';
+      const lblNo     = t? 'م' : 'No.';
+      const lblRisk   = t? 'المخاطر (1–5)' : 'Risk (1–5)';
+
+      const rows = [...document.querySelectorAll('#tbl tbody tr')]
+        .filter(r=>r.querySelector('.pick')?.checked)
+        .map(r=>r.cells[1].innerText.trim()).filter(Boolean);
+
+      const rowsHTML = rows.map((txt,i)=>{
+        const cells = [`<td>${i+1}</td>`,`<td>${txt.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</td>`];
+        if(opt.includeChecks){ cells.push('<td><input type="checkbox"></td>','<td><input type="checkbox"></td>'); }
+        if(opt.includeRisk){ cells.push('<td contenteditable="true" style="text-align:center;min-width:60px"></td>'); }
+        cells.push('<td contenteditable="true" class="note"></td>');
+        return `<tr>${cells.join('')}</tr>`;
+      }).join('');
+
+      const logoHTML = state.logoDataURL ? `<div style="text-align:center;margin-bottom:10px"><img src="${state.logoDataURL}" alt="logo" style="height:${opt.logoIn}in;display:inline-block;object-fit:contain"></div>` : '';
+      const checksHdr = opt.includeChecks? '<th>✔</th><th>✖</th>' : '';
+      const riskHdr = opt.includeRisk? `<th>${lblRisk}</th>` : '';
+
+      return `<!doctype html>
+<html lang="${t?'ar':'en'}" dir="${t?'rtl':'ltr'}"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title}</title>
+<style>
+@page{size:A4;margin:12mm}
+body{font-family:${t?"'Noto Kufi Arabic','Cairo',Tahoma,sans-serif":"'Segoe UI','Roboto',Arial,sans-serif"};margin:0;background:#fff}
+.page{max-width:794px;margin:12px auto;border:${opt.borderW}px solid ${opt.borderColor};border-radius:10px;padding:18px}
+h1{margin:0 0 10px;text-align:center}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{border:1px solid #ccc;padding:8px;vertical-align:top}
+th{background:#eef2ff}
+tr{break-inside:avoid}
+td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word}
+</style>
+</head><body>
+<div class="page">
+  ${logoHTML}
+  <h1>${title}</h1>
+  <div><strong>${lblClient}</strong> ${els.client.value||''}</div>
+  <div><strong>${lblSite}</strong> ${els.site.value||''}</div>
+  <div><strong>${lblAud}</strong> <div contenteditable="true" style="display:inline-block;min-width:200px;border-bottom:1px solid #000"></div></div>
+  <table>
+    <thead><tr><th>${lblNo}</th><th>${t?'البند':'Item'}</th>${checksHdr}${riskHdr}<th>${lblNotes}</th></tr></thead>
+    <tbody>${rowsHTML}</tbody>
+  </table>
+</div>
+</body></html>`;
+    }
+
+    // ===== قوالب جاهزة =====
+    function applyTemplate(key, mode){ const set = templates[state.lang] && templates[state.lang][key] ? templates[state.lang][key] : []; if(!set.length){ alert('لا يوجد قالب لهذه اللغة/الباب حالياً'); return; } applyTemplateFromArray(set, mode); }
+    function applyTemplateFromArray(arr, mode){ const set = Array.isArray(arr)? arr.filter(x=>typeof x==='string' && x.trim()) : []; if(!set.length){ alert('القالب فارغ'); return; } if(mode==='replace') state.items[state.lang] = [...set]; else state.items[state.lang].push(...set); renderTable(); persist(); }
+    function askAndApply(key){ const isReplace = confirm('استبدال البنود الحالية بالقالب؟\nOK = استبدال\nCancel = إضافة'); applyTemplate(key, isReplace ? 'replace' : 'append'); }
+
+    // ===== ربط الأحداث =====
+    els.chapterNo.addEventListener('input', ()=>{ state.chapter.number = els.chapterNo.value; updateTitle(); tryAutoFillFromChapter(); persist(); });
+    els.chapterName.addEventListener('input', ()=>{ state.chapter.name = els.chapterName.value; updateTitle(); tryAutoFillFromChapter(); persist(); });
+    els.filter.addEventListener('input', renderTable);
+
+    els.langAr.addEventListener('click', ()=>{ state.lang='ar'; updateTitle(); renderTable(); persist(); renderUserTemplates(); });
+    els.langEn.addEventListener('click', ()=>{ state.lang='en'; updateTitle(); renderTable(); persist(); renderUserTemplates(); });
+
+    els.optAutoFill.addEventListener('change', ()=>{ state.options.autoFill = els.optAutoFill.checked; persist(); });
+    els.optChecks.addEventListener('change', ()=>{ state.options.includeChecks = els.optChecks.checked; persist(); });
+    els.optRisk.addEventListener('change', ()=>{ state.options.includeRisk = els.optRisk.checked; persist(); });
+    els.optBorderW.addEventListener('input', ()=>{ state.options.borderW = +els.optBorderW.value||0; persist(); });
+    els.optBorderColor.addEventListener('input', ()=>{ state.options.borderColor = els.optBorderColor.value; persist(); });
+    els.optLogoIn.addEventListener('input', ()=>{ state.options.logoIn = +els.optLogoIn.value||1.0; persist(); });
+
+    els.selectAll.addEventListener('click', ()=> document.querySelectorAll('.pick').forEach(cb=>cb.checked=true));
+    els.clearAll.addEventListener('click', ()=> document.querySelectorAll('.pick').forEach(cb=>cb.checked=false));
+    els.addRow.addEventListener('click', ()=>{ const ph = state.lang==='ar'? '* بند جديد' : '* New Item'; state.items[state.lang].unshift(ph); renderTable(); persist(); });
+    els.deleteChecked.addEventListener('click', ()=>{ const keep=[]; document.querySelectorAll('#tbl tbody tr').forEach(r=>{ const checked=r.querySelector('.pick').checked; const text=r.cells[1].innerText.trim(); if(!checked) keep.push(text); }); state.items[state.lang] = keep; renderTable(); persist(); });
+
+    els.tbody.addEventListener('input', (e)=>{ const td = e.target.closest('td[data-index]'); if(!td) return; const idx = +td.dataset.index; const val = td.innerText.trim(); if(Number.isInteger(idx) && idx>=0){ state.items[state.lang][idx] = val; persist(); }});
+
+    // سحب وإفلات لإعادة الترتيب
+    els.tbody.addEventListener('dragstart', (e)=>{ const tr = e.target.closest('tr'); if(!tr) return; tr.classList.add('dragging'); e.dataTransfer.setData('text/plain', tr.dataset.row); });
+    els.tbody.addEventListener('dragend', (e)=>{ const tr = e.target.closest('tr'); if(tr) tr.classList.remove('dragging'); });
+    els.tbody.addEventListener('dragover', (e)=>{ e.preventDefault(); });
+    els.tbody.addEventListener('drop', (e)=>{ e.preventDefault(); const from = parseInt(e.dataTransfer.getData('text/plain'),10); const toTr = e.target.closest('tr'); if(toTr==null) return; const to = parseInt(toTr.dataset.row,10); if(Number.isNaN(from) || Number.isNaN(to) || from===to) return; const arr = state.items[state.lang]; const [moved] = arr.splice(from,1); arr.splice(to,0,moved); renderTable(); persist(); });
+
+    // رفع الشعار
+    els.logoInput.addEventListener('change', e=>{
+      const file = e.target.files[0];
+      if(!file){ state.logoDataURL=''; els.companyLogo.hidden=true; persist(); return; }
+      const r = new FileReader();
+      r.onload = ev => { state.logoDataURL = ev.target.result; els.companyLogo.src = state.logoDataURL; els.companyLogo.hidden=false; persist(); };
+      r.readAsDataURL(file);
+    });
+
+    // القوالب المدمجة
+    els.tplCh1.addEventListener('click', ()=> askAndApply('ch1'));
+    els.tplCh2.addEventListener('click', ()=> askAndApply('ch2'));
+    els.tplCh3.addEventListener('click', ()=> askAndApply('ch3'));
+    els.tplCh4.addEventListener('click', ()=> askAndApply('ch4'));
+    els.tplCh5.addEventListener('click', ()=> askAndApply('ch5'));
+    els.tplCh6.addEventListener('click', ()=> askAndApply('ch6'));
+    els.tplCh7.addEventListener('click', ()=> askAndApply('ch7'));
+    els.tplCh8.addEventListener('click', ()=> askAndApply('ch8'));
+    els.tplErgo.addEventListener('click', ()=> applyTemplateFromArray(templates[state.lang].ergo,'append'));
+
+    // حفظ كقالب مستخدم
+    els.saveAsTemplate.addEventListener('click', ()=>{
+      const name = prompt(state.lang==='ar'?'اسم القالب؟':'Template name?');
+      if(!name) return;
+      const store = loadUserTemplates();
+      store[state.lang] = store[state.lang] || {};
+      store[state.lang][name] = (state.items[state.lang]||[]).slice();
+      saveUserTemplates(store);
+      renderUserTemplates();
+      alert(state.lang==='ar'?'تم حفظ القالب.':'Template saved.');
+    });
+
+    // لصق من Word
+    els.pasteFromWord.addEventListener('click', ()=> els.dlg.showModal());
+    els.dlgCancel.addEventListener('click', ()=> els.dlg.close());
+    function normalizeLines(text){
+      return text.split(/\r?\n/)
+        .map(s=>s.replace(/^\s*(?:[0-9]+[\).\-\)]\s*|[\u2022\-•▪◆◦\*]+\s*)?/,'').trim())
+        .filter(Boolean);
+    }
+    els.dlgApply.addEventListener('click', ()=>{
+      const lines = normalizeLines(els.dlgText.value||'');
+      if(!lines.length){ alert('لا توجد بنود.'); return; }
+      if(els.dlgMode.value==='replace') state.items[state.lang] = lines; else state.items[state.lang].push(...lines);
+      // نسخ للإنجليزية لو طلب
+      if(els.dlgCopyToEn.checked){
+        if(state.lang==='ar'){ state.items.en = lines.slice(); } else { state.items.ar = lines.slice(); }
+      }
+      // ربط كباب
+      const no = els.dlgNo.value.trim();
+      const nm = els.dlgName.value.trim();
+      if(els.dlgBind.checked && (no||nm)){
+        const arrAr = (state.lang==='ar')? lines.slice() : (state.items.ar||[]).slice();
+        const arrEn = (state.lang==='en')? lines.slice() : (state.items.en||[]).slice();
+        setChapterTemplate(no,nm, arrAr, arrEn);
+      }
+      // حفظ كقالب باسم
+      const tplName = (els.dlgTplName.value||'').trim();
+      if(tplName){
+        const store = loadUserTemplates();
+        store[state.lang] = store[state.lang] || {};
+        store[state.lang][tplName] = lines.slice();
+        saveUserTemplates(store);
+      }
+      if(no) { state.chapter.number = no; els.chapterNo.value = no; }
+      if(nm) { state.chapter.name = nm; els.chapterName.value = nm; }
+      renderTable(); updateTitle(); persist(); renderUserTemplates(); els.dlg.close();
+    });
+
+    // تصدير HTML للعميل
+    function download(filename, text){
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([text], {type:'text/html'}));
+      a.download = filename; a.click(); URL.revokeObjectURL(a.href);
+    }
+    els.exportHtml.addEventListener('click', ()=>{
+      const html = buildClientHTML();
+      const base = (state.lang==='ar'?'قائمة-تدقيق':'Checklist');
+      const no = (els.chapterNo.value||'').trim();
+      const nm = (els.chapterName.value||'').trim().replace(/\s+/g,'-');
+      const fn = `${base}-${no||'X'}-${nm||'Generic'}.html`;
+      download(fn, html);
+    });
+
+    // استيراد/تصدير JSON
+    els.exportJson.addEventListener('click', ()=>{
+      const data = { lang: state.lang, chapter: state.chapter, items: state.items, options: state.options };
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'}));
+      a.download = 'audit-checklist.json'; a.click(); URL.revokeObjectURL(a.href);
+    });
+    els.importJson.addEventListener('click', ()=>{
+      const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
+      inp.onchange = async (e)=>{
+        const file = e.target.files[0]; if(!file) return;
+        try{ const text = await file.text(); const data = JSON.parse(text);
+          if(data.items){ state.items = data.items; }
+          if(data.lang){ state.lang = data.lang; }
+          if(data.chapter){ state.chapter = data.chapter; }
+          if(data.options){ state.options = Object.assign(state.options, data.options); }
+          renderTable(); updateTitle(); persist(); renderUserTemplates();
+        }catch(err){ alert('ملف غير صالح'); console.error(err); }
+      };
+      inp.click();
+    });
+
+    // طباعة و PDF
+    els.printBtn.addEventListener('click', ()=> window.print());
+    els.exportPdf.addEventListener('click', ()=>{
+      const html = buildClientHTML();
+      const w = window.open('', '_blank');
+      w.document.write(html); w.document.close();
+      w.focus();
+      // امنح الصفحة وقتًا لتُحمِّل ثم اطبع
+      setTimeout(()=>{ try{ w.print(); } finally { /* لا نغلق تلقائياً لحفظ ملف PDF */ } }, 400);
+    });
+
+    // حفظ/مسح مسودة
+    els.saveDraft.addEventListener('click', ()=>{ persist(); alert(state.lang==='ar'?'تم حفظ المسودة.':'Draft saved.'); });
+    els.clearDraft.addEventListener('click', ()=>{ if(confirm('مسح المسودة المخزّنة؟')){ localStorage.removeItem(LS_KEY_DRAFT); alert('تم المسح.'); location.reload(); } });
+
+    // اختبارات سريعة
+    els.btnRunTests.addEventListener('click', ()=>{
+      const out=[];
+      out.push('— اللغة الحالية: '+state.lang);
+      out.push('— عدد البنود (AR/EN): '+(state.items.ar?.length||0)+' / '+(state.items.en?.length||0));
+      out.push('— العنوان: '+document.title);
+      out.push('— خيارات: checks='+state.options.includeChecks+', risk='+state.options.includeRisk);
+      // تجربة بناء HTML
+      try{ const s = buildClientHTML(); out.push('— بناء HTML ✅ ('+s.length+' chars)'); }catch(e){ out.push('— بناء HTML ❌ '+e.message); }
+      // تجربة ربط الباب
+      try{
+        setChapterTemplate('4','تداول وتخزين المواد', ['اختبار'], ['Test']);
+        const got = findChapterTemplate('4','تداول وتخزين المواد');
+        out.push('— ربط الباب ✅ ' + (!!got && got.ar && got.en));
+      }catch(e){ out.push('— ربط الباب ❌ '+e.message); }
+      els.testOut.textContent = out.join('\n');
+    });
+
+    // بداية تشغيل
+    restore();
+    // إن لم توجد مسودة، جهّز افتراضيًا
+    if(!(state.items.ar.length||state.items.en.length)){
+      state.items.ar = templates.ar.ch1.slice();
+      state.items.en = templates.en.ch1.slice();
+      renderTable();
+    }
+  });
+})();
+</script>
+</body>
+</html>
