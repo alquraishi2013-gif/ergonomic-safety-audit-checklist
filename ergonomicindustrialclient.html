@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نسخة العميل – Ergonomic Industrial</title>
+<style>
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: "Noto Kufi Arabic", "Cairo", sans-serif;
+    background: #f7f8fb;
+  }
+  .wrap {
+    max-width: 900px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.1);
+  }
+  iframe {
+    width: 100%;
+    height: 90vh;
+    border: none;
+    background: #fff;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #2563eb;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧾 نسخة العميل – Ergonomic Industrial</h1>
+  <iframe id="preview"></iframe>
+</div>
+
+<script>
+  // نحاول جلب نسخة HTML من LocalStorage
+  const html = localStorage.getItem('client_preview_html');
+
+  if (html) {
+    const iframe = document.getElementById('preview');
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+  } else {
+    document.body.innerHTML = `
+      <div style="max-width:600px;margin:auto;text-align:center;padding:50px;">
+        <h2 style="color:#b91c1c;">❌ لا توجد بيانات للعرض</h2>
+        <p>يُرجى فتح هذه الصفحة من خلال زر <strong>"تصدير نسخة العميل (HTML)"</strong> داخل النظام.</p>
+      </div>
+    `;
+  }
+</script>
+</body>
+</html>
