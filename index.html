@@ -636,14 +636,18 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
       a.href = URL.createObjectURL(new Blob([text], {type:'text/html'}));
       a.download = filename; a.click(); URL.revokeObjectURL(a.href);
     }
-    els.exportHtml.addEventListener('click', ()=>{
-      const html = buildClientHTML();
-      const base = (state.lang==='ar'?'قائمة-تدقيق':'Checklist');
-      const no = (els.chapterNo.value||'').trim();
-      const nm = (els.chapterName.value||'').trim().replace(/\s+/g,'-');
-      const fn = `${base}-${no||'X'}-${nm||'Generic'}.html`;
-      download(fn, html);
-    });
+  // فتح نسخة العميل وتمرير المحتوى لها
+els.exportHtml.addEventListener('click', ()=>{
+  const html = buildClientHTML();
+  try {
+    localStorage.setItem('client_preview_html', html);
+  } catch(e) {
+    alert('تعذّر حفظ بيانات نسخة العميل محلياً. جرّب تعطيل الحظر أو استخدم متصفحاً آخر.');
+    return;
+  }
+  window.open('ergonomicindustrialclient.html', '_blank');
+});
+
 
     // استيراد/تصدير JSON
     els.exportJson.addEventListener('click', ()=>{
