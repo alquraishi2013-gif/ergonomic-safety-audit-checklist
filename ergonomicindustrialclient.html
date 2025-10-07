@@ -3,95 +3,220 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>نسخة العميل – Ergonomic Industrial</title>
+<title>نسخة العمل (Work Flow) – Ergonomic Industrial</title>
 <style>
 :root{--bg:#f7f8fb;--ink:#111;--card:#fff;--accent:#2563eb;--muted:#666}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Kufi Arabic","Cairo",sans-serif}
 .wrap{max-width:920px;margin:auto;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 0 12px rgba(0,0,0,.1)}
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:15px}
+h1{margin:0 0 10px;text-align:center;color:var(--accent);font-size:20px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:12px 0}
 .btn{padding:8px 14px;border:1px solid #ddd;border-radius:10px;background:#fff;cursor:pointer;font-size:14px}
 .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn.warn{background:#fee2e2;border-color:#ef4444}
-iframe{width:100%;height:80vh;border:none;border-radius:8px;background:#fff}
+.group{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.small{font-size:.9rem;color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;max-width:780px;margin:0 auto}
+.row label{display:block;font-size:.9rem;color:#333}
+input[type="text"],input[type="email"],input[type="tel"]{padding:8px 10px;border:1px solid #ccc;border-radius:10px;width:100%}
+select{padding:8px 10px;border:1px solid #ccc;border-radius:10px}
+iframe{width:100%;height:78vh;border:none;border-radius:8px;background:#fff}
 footer{text-align:center;font-size:.85rem;color:var(--muted);margin-top:10px}
-@media(max-width:720px){iframe{height:75vh}}
+@media(max-width:720px){.row{grid-template-columns:1fr} iframe{height:72vh}}
 @media print{.no-print{display:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1 style="text-align:center;color:var(--accent);margin-bottom:10px">🧾 نسخة العميل – Ergonomic Industrial</h1>
+  <h1>🧾 نسخة العمل (Work Flow) – Ergonomic Industrial</h1>
 
+  <!-- اختيار الدور -->
   <div class="toolbar no-print">
-    <button class="btn primary" id="printBtn">🖨️ طباعة / PDF</button>
-    <button class="btn" id="sendWhatsApp">💬 إرسال عبر واتساب</button>
-    <button class="btn" id="sendEmail">✉️ إرسال عبر البريد</button>
-    <button class="btn" id="resendToClient">🔁 إعادة إرسال للعميل</button>
-    <button class="btn" id="saveLocal">💾 حفظ الملاحظات</button>
-    <button class="btn" id="shareGeneral">📤 مشاركة</button>
+    <label class="small">الدور:</label>
+    <select id="role">
+      <option value="client">👤 عميل</option>
+      <option value="auditor">🕵️ مدقّق</option>
+      <option value="designer">🛠️ مصمّم</option>
+    </select>
+    <span class="small" id="docTitleHint"></span>
+  </div>
+
+  <!-- وسائل التواصل -->
+  <div class="row no-print" style="margin-bottom:6px">
+    <div>
+      <label>📧 بريد العميل (للإرسال من المدقّق للعميل):</label>
+      <input id="clientEmail" type="email" placeholder="example@company.com">
+    </div>
+    <div>
+      <label>💬 واتساب العميل (رقم دولي مثل 9665xxxxxxx):</label>
+      <input id="clientWa" type="tel" placeholder="9665xxxxxxxx">
+    </div>
+  </div>
+
+  <!-- أزرار حسب الدور -->
+  <div class="toolbar no-print">
+    <div class="group" data-role="client">
+      <button class="btn primary" id="printBtn">🖨️ طباعة / PDF</button>
+      <button class="btn" id="sendWhatsApp">💬 إرسال عبر واتساب</button>
+      <button class="btn" id="sendEmailAuditor">✉️ إرسال للمصمّم (ergonomicindustrial@gmail.com)</button>
+      <button class="btn" id="downloadHtml">⬇️ تنزيل كـ HTML</button>
+      <button class="btn" id="shareGeneral">📤 مشاركة</button>
+      <button class="btn" id="saveLocal">💾 حفظ الملاحظات محليًا</button>
+    </div>
+
+    <div class="group" data-role="auditor">
+      <button class="btn primary" id="printBtn2">🖨️ طباعة / PDF</button>
+      <button class="btn" id="resendToClientWA">🔁 إعادة إرسال للعميل (واتساب)</button>
+      <button class="btn" id="resendToClientMail">🔁 إعادة إرسال للعميل (إيميل)</button>
+      <button class="btn" id="downloadHtml2">⬇️ تنزيل كـ HTML</button>
+      <button class="btn" id="saveLocal2">💾 حفظ الملاحظات</button>
+      <span class="small">يمكنك تعديل الخانات داخل النسخة ثم الحفظ/الإرسال.</span>
+    </div>
+
+    <div class="group" data-role="designer">
+      <button class="btn primary" id="printBtn3">🖨️ طباعة / PDF</button>
+      <button class="btn" id="downloadHtml3">⬇️ تنزيل كـ HTML</button>
+      <button class="btn" id="shareGeneral3">📤 مشاركة</button>
+    </div>
   </div>
 
   <iframe id="preview"></iframe>
-  <footer>Ergonomic Industrial © جميع الحقوق محفوظة</footer>
+  <footer class="no-print">Ergonomic Industrial © جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
-  const iframe=document.getElementById('preview');
-  const html=localStorage.getItem('client_preview_html');
+  const iframe = document.getElementById('preview');
+  const roleSel = document.getElementById('role');
+  const docTitleHint = document.getElementById('docTitleHint');
+  const clientEmail = document.getElementById('clientEmail');
+  const clientWa = document.getElementById('clientWa');
+
+  // ===== تحميل النسخة من sessionStorage (?k) ثم fallback إلى localStorage =====
+  function loadHtmlFromStore(){
+    const params=new URLSearchParams(location.search);
+    const k=params.get('k');
+    let html=null;
+    if(k){ try{ html=sessionStorage.getItem(k); }catch(e){} }
+    if(!html){ try{ html=localStorage.getItem('client_preview_html'); }catch(e){} }
+    return html;
+  }
+
+  const html = loadHtmlFromStore();
   if(!html){
-    document.body.innerHTML='<div style="text-align:center;padding:50px"><h2 style="color:#b91c1c">❌ لا توجد بيانات للعرض</h2><p>افتح الصفحة من زر <strong>تصدير نسخة العميل</strong> داخل النظام.</p></div>';
+    document.body.innerHTML = `
+      <div style="max-width:600px;margin:auto;text-align:center;padding:50px;">
+        <h2 style="color:#b91c1c;">❌ لا توجد بيانات للعرض</h2>
+        <p>افتح هذه الصفحة عبر زر <strong>"تصدير هذا الباب (HTML)"</strong> أو <strong>"تصدير باب-باب"</strong> من <code>index.html</code>.</p>
+      </div>`;
     return;
   }
 
-  // تحميل النسخة داخل الإطار
-  const doc=iframe.contentDocument||iframe.contentWindow.document;
+  // اكتب الـ HTML داخل الإطار (نفس الأصل – آمن للوصول)
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
   doc.open(); doc.write(html); doc.close();
 
-  // === أزرار الأدوات ===
-  document.getElementById('printBtn').onclick=()=>iframe.contentWindow.print();
+  // عنوان الوثيقة لاستخدامه في الموضوع والرسائل
+  function currentTitle(){
+    try{ return (doc.title || 'نسخة التدقيق'); }catch(e){ return 'نسخة التدقيق'; }
+  }
+  function getCurrentHtml(){
+    try{ return doc.documentElement.outerHTML; }catch(e){ return html; }
+  }
+  function makeFile(){
+    const blob=new Blob([getCurrentHtml()],{type:'text/html'});
+    return new File([blob], (currentTitle().replace(/[^\w\u0600-\u06FF\- ]+/g,'_') || 'Ergonomic-Checklist') + '.html', {type:'text/html'});
+  }
 
-  document.getElementById('sendWhatsApp').onclick=()=>{
-    const text="مرحباً، هذه نسخة الباب للتدقيق من Ergonomic Industrial. 👇";
-    const blob=new Blob([html],{type:'text/html'});
-    const file=new File([blob],'Ergonomic-Checklist.html',{type:'text/html'});
+  // تلميح العنوان
+  docTitleHint.textContent = '— ' + currentTitle();
+
+  // إظهار مجموعة الأزرار حسب الدور
+  function applyRole(){
+    const role=roleSel.value;
+    document.querySelectorAll('[data-role]').forEach(el=>{
+      el.style.display = (el.getAttribute('data-role')===role)? 'flex':'none';
+    });
+  }
+  roleSel.addEventListener('change', applyRole);
+  applyRole();
+
+  // أدوات عامة
+  function toWaLink(phone, text){
+    const msg=encodeURIComponent(text||'');
+    const digits=(phone||'').replace(/[^\d]/g,'');
+    return digits? `https://wa.me/${digits}?text=${msg}` : `https://wa.me/?text=${msg}`;
+  }
+  function openMail(to, subject, body){
+    const s=encodeURIComponent(subject||''); const b=encodeURIComponent(body||'');
+    window.location.href=`mailto:${encodeURIComponent(to||'')}?subject=${s}&body=${b}`;
+  }
+  function shareOrDownload(shareText){
+    const file=makeFile();
     if(navigator.canShare && navigator.canShare({files:[file]})){
-      navigator.share({title:"Ergonomic Industrial",text:text,files:[file]});
+      navigator.share({title: currentTitle(), text: shareText||'مشاركة نسخة التدقيق', files:[file]});
     }else{
-      const msg=encodeURIComponent(text);
-      window.open(`https://wa.me/?text=${msg}`,'_blank');
+      // تنزيل مباشر إذا المشاركة غير مدعومة
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(file); a.download=file.name; a.click(); URL.revokeObjectURL(a.href);
+      alert('ℹ️ تم تنزيل الملف على جهازك. يمكنك إرفاقه بالواتساب/الإيميل يدويًا.');
     }
-  };
-
-  document.getElementById('sendEmail').onclick=()=>{
-    const subject="نسخة التدقيق – Ergonomic Industrial";
-    const body="مرفق نسخة التدقيق الخاصة بكم.\n\nتحياتنا،\nErgonomic Industrial";
-    window.location.href=`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
-
-  document.getElementById('resendToClient').onclick=()=>{
-    const text="📩 تمت مراجعة الباب من قبل المدقق.\nيرجى مراجعة الملاحظات وإعادة الإرسال بعد التحديث.";
-    const msg=encodeURIComponent(text);
-    window.open(`https://wa.me/?text=${msg}`,'_blank');
-  };
-
-  document.getElementById('saveLocal').onclick=()=>{
+  }
+  function downloadOnly(){
+    const file=makeFile();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(file); a.download=file.name; a.click(); URL.revokeObjectURL(a.href);
+  }
+  function saveLocalCopy(){
     try{
-      localStorage.setItem('client_saved_html',html);
-      alert('✅ تم حفظ النسخة محليًا بنجاح.');
-    }catch(e){alert('❌ تعذّر الحفظ.');}
-  };
+      localStorage.setItem('client_saved_html', getCurrentHtml());
+      alert('✅ تم حفظ النسخة (بالملاحظات) محليًا.');
+    }catch(e){ alert('❌ تعذّر الحفظ.'); }
+  }
 
-  document.getElementById('shareGeneral').onclick=()=>{
-    const blob=new Blob([html],{type:'text/html'});
-    const file=new File([blob],'Ergonomic-Checklist.html',{type:'text/html'});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      navigator.share({title:"Ergonomic Industrial",text:"مشاركة نسخة التدقيق",files:[file]});
-    }else{
-      alert('خاصية المشاركة غير مدعومة في هذا المتصفح.');
-    }
+  // ===== أزرار العميل =====
+  (document.getElementById('printBtn')||{}).onclick=()=>iframe.contentWindow.print();
+  (document.getElementById('sendWhatsApp')||{}).onclick=()=>{
+    const text = `مرحباً، هذه نسخة ${currentTitle()} من Ergonomic Industrial.`;
+    const link = toWaLink('', text);
+    window.open(link,'_blank');
   };
+  (document.getElementById('sendEmailAuditor')||{}).onclick=()=>{
+    const subject = `${currentTitle()} – Ergonomic Industrial`;
+    const body = `السلام عليكم،\n\nأرسل لكم نسخة الباب للمراجعة.\nالعنوان: ${currentTitle()}\n\nتم الإنشاء من نظام Ergonomic Industrial.\n\n(ملاحظة: بإمكانكم الرد وإرفاق الملف المحفوظ.)`;
+    openMail('ergonomicindustrial@gmail.com', subject, body);
+  };
+  (document.getElementById('downloadHtml')||{}).onclick=downloadOnly;
+  (document.getElementById('shareGeneral')||{}).onclick=()=>shareOrDownload('مشاركة نسخة التدقيق');
+  (document.getElementById('saveLocal')||{}).onclick=saveLocalCopy;
+
+  // ===== أزرار المدقّق =====
+  (document.getElementById('printBtn2')||{}).onclick=()=>iframe.contentWindow.print();
+  (document.getElementById('resendToClientWA')||{}).onclick=()=>{
+    const text = `تمت مراجعة ${currentTitle()}.\nيرجى الاطلاع وإعادة الإرسال بعد التحديث.`;
+    const link = toWaLink(clientWa.value, text);
+    window.open(link,'_blank');
+  };
+  (document.getElementById('resendToClientMail')||{}).onclick=()=>{
+    const subject = `مراجعة ${currentTitle()} – يرجى الاطلاع`;
+    const body = `السلام عليكم،\n\nأرفقت لكم ملاحظاتي على ${currentTitle()}.\nيرجى المراجعة ثم إعادة الإرسال.\n\nتحياتي.`;
+    openMail(clientEmail.value || '', subject, body);
+  };
+  (document.getElementById('downloadHtml2')||{}).onclick=downloadOnly;
+  (document.getElementById('saveLocal2')||{}).onclick=saveLocalCopy;
+
+  // ===== أزرار المصمّم =====
+  (document.getElementById('printBtn3')||{}).onclick=()=>iframe.contentWindow.print();
+  (document.getElementById('downloadHtml3')||{}).onclick=downloadOnly;
+  (document.getElementById('shareGeneral3')||{}).onclick=()=>shareOrDownload('مشاركة نسخة التدقيق');
+
+  // حفظ مدخلات العميل (اختياري)
+  try{
+    const savedCE = localStorage.getItem('wf_client_email'); if(savedCE) clientEmail.value=savedCE;
+    const savedWA = localStorage.getItem('wf_client_wa'); if(savedWA) clientWa.value=savedWA;
+  }catch(e){}
+  clientEmail.addEventListener('input', ()=>{ try{ localStorage.setItem('wf_client_email', clientEmail.value||''); }catch(e){} });
+  clientWa.addEventListener('input', ()=>{ try{ localStorage.setItem('wf_client_wa', clientWa.value||''); }catch(e){} });
 });
 </script>
 </body>
