@@ -92,12 +92,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   const clientEmail = document.getElementById('clientEmail');
   const clientWa = document.getElementById('clientWa');
 
-  // ===== تحميل النسخة من sessionStorage (?k) ثم fallback إلى localStorage =====
+  // ===== تحميل النسخة من localStorage (?k) ثم fallback إلى client_preview_html =====
   function loadHtmlFromStore(){
     const params=new URLSearchParams(location.search);
     const k=params.get('k');
     let html=null;
-    if(k){ try{ html=sessionStorage.getItem(k); }catch(e){} }
+    if(k){ try{ html=localStorage.getItem(k); }catch(e){} }
     if(!html){ try{ html=localStorage.getItem('client_preview_html'); }catch(e){} }
     return html;
   }
@@ -112,11 +112,11 @@ document.addEventListener('DOMContentLoaded',()=>{
     return;
   }
 
-  // اكتب الـ HTML داخل الإطار (نفس الأصل – آمن للوصول)
+  // اكتب الـ HTML داخل الإطار (نفس الأصل)
   const doc = iframe.contentDocument || iframe.contentWindow.document;
   doc.open(); doc.write(html); doc.close();
 
-  // عنوان الوثيقة لاستخدامه في الموضوع والرسائل
+  // عنوان الوثيقة
   function currentTitle(){
     try{ return (doc.title || 'نسخة التدقيق'); }catch(e){ return 'نسخة التدقيق'; }
   }
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // تلميح العنوان
   docTitleHint.textContent = '— ' + currentTitle();
 
-  // إظهار مجموعة الأزرار حسب الدور
+  // إظهار الأزرار حسب الدور
   function applyRole(){
     const role=roleSel.value;
     document.querySelectorAll('[data-role]').forEach(el=>{
@@ -156,7 +156,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(navigator.canShare && navigator.canShare({files:[file]})){
       navigator.share({title: currentTitle(), text: shareText||'مشاركة نسخة التدقيق', files:[file]});
     }else{
-      // تنزيل مباشر إذا المشاركة غير مدعومة
       const a=document.createElement('a');
       a.href=URL.createObjectURL(file); a.download=file.name; a.click(); URL.revokeObjectURL(a.href);
       alert('ℹ️ تم تنزيل الملف على جهازك. يمكنك إرفاقه بالواتساب/الإيميل يدويًا.');
