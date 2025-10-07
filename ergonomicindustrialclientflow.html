@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>نسخة العمل (Work Flow) – Ergonomic Industrial</title>
 <style>
-:root{--bg:#f7f8fb;--ink:#111;--card:#fff;--accent:#2563eb;--muted:#666}
+:root{--bg:#f7f8fb;--ink:#111;--card:#fff;--accent:#2563eb;--muted:#666;--warn:#f59e0b}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Kufi Arabic","Cairo",sans-serif}
 .wrap{max-width:920px;margin:auto;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 0 12px rgba(0,0,0,.1)}
@@ -14,6 +14,8 @@ h1{margin:0 0 10px;text-align:center;color:var(--accent);font-size:20px}
 .btn{padding:8px 14px;border:1px solid #ddd;border-radius:10px;background:#fff;cursor:pointer;font-size:14px}
 .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn.warn{background:#fee2e2;border-color:#ef4444}
+.btn.on{outline:2px solid var(--accent)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
 .group{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .small{font-size:.9rem;color:var(--muted)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;max-width:780px;margin:0 auto}
@@ -24,6 +26,16 @@ iframe{width:100%;height:78vh;border:none;border-radius:8px;background:#fff}
 footer{text-align:center;font-size:.85rem;color:var(--muted);margin-top:10px}
 @media(max-width:720px){.row{grid-template-columns:1fr} iframe{height:72vh}}
 @media print{.no-print{display:none}}
+
+/* شارة التعليق داخل نسخة العميل */
+.cmt-badge{display:inline-block;background:#fef3c7;border:1px solid var(--warn);border-radius:6px;padding:0 6px;font-size:12px;margin-inline-start:6px;white-space:nowrap}
+.cmt-badge::before{content:"💬 "}
+
+/* لوحة جانبية بسيطة لإحصاء التعليقات */
+#cmtPanel{position:fixed;inset-inline-end:10px;bottom:10px;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.08);padding:10px 12px;max-width:320px;max-height:45vh;overflow:auto}
+#cmtPanel h3{margin:.2rem 0 .4rem;font-size:14px;color:#333}
+#cmtPanel .item{font-size:13px;border-top:1px dashed #eee;padding:6px 0}
+#cmtPanel .meta{color:#666;font-size:12px}
 </style>
 </head>
 <body>
@@ -62,6 +74,7 @@ footer{text-align:center;font-size:.85rem;color:var(--muted);margin-top:10px}
       <button class="btn" id="downloadHtml">⬇️ تنزيل كـ HTML</button>
       <button class="btn" id="shareGeneral">📤 مشاركة</button>
       <button class="btn" id="saveLocal">💾 حفظ الملاحظات محليًا</button>
+      <button class="btn" id="toggleComment">📝 وضع التعليق (تشغيل/إيقاف)</button>
     </div>
 
     <div class="group" data-role="auditor">
@@ -70,17 +83,20 @@ footer{text-align:center;font-size:.85rem;color:var(--muted);margin-top:10px}
       <button class="btn" id="resendToClientMail">🔁 إعادة إرسال للعميل (إيميل)</button>
       <button class="btn" id="downloadHtml2">⬇️ تنزيل كـ HTML</button>
       <button class="btn" id="saveLocal2">💾 حفظ الملاحظات</button>
-      <span class="small">يمكنك تعديل الخانات داخل النسخة ثم الحفظ/الإرسال.</span>
+      <button class="btn" id="toggleComment2">📝 وضع التعليق (تشغيل/إيقاف)</button>
+      <span class="small">اضغط على أي سطر داخل الجدول لإضافة تعليق.</span>
     </div>
 
     <div class="group" data-role="designer">
       <button class="btn primary" id="printBtn3">🖨️ طباعة / PDF</button>
       <button class="btn" id="downloadHtml3">⬇️ تنزيل كـ HTML</button>
       <button class="btn" id="shareGeneral3">📤 مشاركة</button>
+      <button class="btn" id="toggleComment3">📝 وضع التعليق (تشغيل/إيقاف)</button>
     </div>
   </div>
 
   <iframe id="preview"></iframe>
+  <div id="cmtPanel" class="no-print" style="display:none"></div>
   <footer class="no-print">Ergonomic Industrial © جميع الحقوق محفوظة</footer>
 </div>
 
@@ -91,6 +107,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   const docTitleHint = document.getElementById('docTitleHint');
   const clientEmail = document.getElementById('clientEmail');
   const clientWa = document.getElementById('clientWa');
+  const cmtPanel = document.getElementById('cmtPanel');
+  const btnsToggle = [ 'toggleComment','toggleComment2','toggleComment3' ].map(id=>document.getElementById(id));
 
   // ===== تحميل النسخة من localStorage (?k) ثم fallback إلى client_preview_html =====
   function loadHtmlFromStore(){
@@ -116,22 +134,20 @@ document.addEventListener('DOMContentLoaded',()=>{
   const doc = iframe.contentDocument || iframe.contentWindow.document;
   doc.open(); doc.write(html); doc.close();
 
-  // عنوان الوثيقة
-  function currentTitle(){
-    try{ return (doc.title || 'نسخة التدقيق'); }catch(e){ return 'نسخة التدقيق'; }
+  // عنوان الوثيقة + مفتاح تخزين التعليقات
+  function currentTitle(){ try{ return (doc.title || 'نسخة التدقيق'); }catch(e){ return 'نسخة التدقيق'; } }
+  const CMTPREFIX = 'wf_comments_';
+  const cmtKey = CMTPREFIX + (currentTitle() || 'doc');
+
+  // تحميل/حفظ التعليقات
+  function loadComments(){
+    try{ return JSON.parse(localStorage.getItem(cmtKey)) || {}; }catch(e){ return {}; }
   }
-  function getCurrentHtml(){
-    try{ return doc.documentElement.outerHTML; }catch(e){ return html; }
-  }
-  function makeFile(){
-    const blob=new Blob([getCurrentHtml()],{type:'text/html'});
-    return new File([blob], (currentTitle().replace(/[^\w\u0600-\u06FF\- ]+/g,'_') || 'Ergonomic-Checklist') + '.html', {type:'text/html'});
+  function saveComments(map){
+    try{ localStorage.setItem(cmtKey, JSON.stringify(map||{})); }catch(e){}
   }
 
-  // تلميح العنوان
-  docTitleHint.textContent = '— ' + currentTitle();
-
-  // إظهار الأزرار حسب الدور
+  // ربط الدور
   function applyRole(){
     const role=roleSel.value;
     document.querySelectorAll('[data-role]').forEach(el=>{
@@ -151,6 +167,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     const s=encodeURIComponent(subject||''); const b=encodeURIComponent(body||'');
     window.location.href=`mailto:${encodeURIComponent(to||'')}?subject=${s}&body=${b}`;
   }
+  function getCurrentHtml(){
+    try{ return doc.documentElement.outerHTML; }catch(e){ return html; }
+  }
+  function makeFile(){
+    const blob=new Blob([getCurrentHtml()],{type:'text/html'});
+    return new File([blob], (currentTitle().replace(/[^\w\u0600-\u06FF\- ]+/g,'_') || 'Ergonomic-Checklist') + '.html', {type:'text/html'});
+  }
   function shareOrDownload(shareText){
     const file=makeFile();
     if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -169,9 +192,127 @@ document.addEventListener('DOMContentLoaded',()=>{
   function saveLocalCopy(){
     try{
       localStorage.setItem('client_saved_html', getCurrentHtml());
-      alert('✅ تم حفظ النسخة (بالملاحظات) محليًا.');
+      alert('✅ تم حفظ النسخة (بالتعليقات/الملاحظات) محليًا.');
     }catch(e){ alert('❌ تعذّر الحفظ.'); }
   }
+
+  // ===== وضع التعليق داخل iframe =====
+  let commentMode = false;
+  let comments = loadComments(); // خريطة: { rowIndex: "نص التعليق" }
+
+  function renderBadges(){
+    try{
+      const rows = Array.from(doc.querySelectorAll('table tbody tr'));
+      rows.forEach((tr, idx)=>{
+        // احذف الشارة القديمة
+        const old = tr.querySelector('.cmt-badge');
+        if(old) old.remove();
+        // أضف إذا في تعليق
+        const txt = comments[idx];
+        if(txt){
+          const targetCell = tr.cells[1] || tr.cells[tr.cells.length-1];
+          if(targetCell){
+            const span = doc.createElement('span');
+            span.className = 'cmt-badge';
+            span.title = txt;
+            span.textContent = (txt.length>42? txt.slice(0,42)+'…' : txt);
+            targetCell.appendChild(span);
+          }
+        }
+      });
+    }catch(e){}
+  }
+
+  function openAddCommentDialog(rowIdx, current){
+    const t = prompt('أدخل التعليق لهذا السطر:', current || '');
+    if(t===null) return; // إلغاء
+    if(!t.trim()){
+      // حذف التعليق إن كان موجودًا
+      delete comments[rowIdx];
+    } else {
+      comments[rowIdx] = t.trim();
+    }
+    saveComments(comments);
+    renderBadges();
+    renderPanel();
+  }
+
+  function onIframeClick(e){
+    if(!commentMode) return;
+    const tr = e.target.closest('tr');
+    if(!tr) return;
+    const rows = Array.from(doc.querySelectorAll('table tbody tr'));
+    const rowIdx = rows.indexOf(tr);
+    if(rowIdx<0) return;
+    const existing = comments[rowIdx] || '';
+    openAddCommentDialog(rowIdx, existing);
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function setCommentMode(on){
+    commentMode = !!on;
+    btnsToggle.forEach(btn=>{ if(btn){ btn.classList.toggle('on', commentMode); }});
+    if(commentMode){
+      doc.addEventListener('click', onIframeClick, true);
+      cmtPanel.style.display='block';
+    }else{
+      doc.removeEventListener('click', onIframeClick, true);
+      cmtPanel.style.display='none';
+    }
+  }
+
+  function renderPanel(){
+    const count = Object.keys(comments).length;
+    const rows = Array.from(doc.querySelectorAll('table tbody tr'));
+    const itemsHtml = Object.entries(comments).map(([idx, text])=>{
+      const i = parseInt(idx,10);
+      const itemTxt = rows[i]?.cells?.[1]?.innerText?.trim() || `السطر #${i+1}`;
+      return `<div class="item">
+        <div class="meta">سطر ${i+1}:</div>
+        <div>${(text||'').replace(/</g,'&lt;')}</div>
+        <div style="margin-top:6px">
+          <button data-act="go" data-i="${i}" class="btn" style="padding:2px 8px">انتقال</button>
+          <button data-act="edit" data-i="${i}" class="btn" style="padding:2px 8px">تعديل</button>
+          <button data-act="del" data-i="${i}" class="btn warn" style="padding:2px 8px">حذف</button>
+        </div>
+      </div>`;
+    }).join('') || `<div class="small">لا توجد تعليقات حتى الآن. فعّل وضع التعليق واضغط على سطر داخل الجدول.</div>`;
+    cmtPanel.innerHTML = `
+      <h3>💬 التعليقات (${count})</h3>
+      ${itemsHtml}
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <button id="cmtExport" class="btn">⬇️ تنزيل النسخة (بالتعليقات)</button>
+        <button id="cmtClear" class="btn warn">🗑️ حذف جميع التعليقات</button>
+      </div>
+    `;
+    // أحداث داخل اللوحة
+    cmtPanel.querySelectorAll('button[data-act]').forEach(b=>{
+      b.onclick = ()=>{
+        const act=b.dataset.act, i=parseInt(b.dataset.i,10);
+        const rows = Array.from(doc.querySelectorAll('table tbody tr'));
+        if(act==='go' && rows[i]) rows[i].scrollIntoView({behavior:'smooth', block:'center'});
+        if(act==='edit') openAddCommentDialog(i, comments[i]||'');
+        if(act==='del'){ delete comments[i]; saveComments(comments); renderBadges(); renderPanel(); }
+      };
+    });
+    const btnExport = cmtPanel.querySelector('#cmtExport');
+    if(btnExport) btnExport.onclick = downloadOnly;
+    const btnClear = cmtPanel.querySelector('#cmtClear');
+    if(btnClear) btnClear.onclick = ()=>{
+      if(confirm('حذف جميع التعليقات؟')){ comments={}; saveComments(comments); renderBadges(); renderPanel(); }
+    };
+  }
+
+  // تفعيل/تعطيل التعليق من الأزرار
+  btnsToggle.forEach(btn=>{ if(btn){ btn.onclick=()=> setCommentMode(!commentMode); }});
+
+  // تلميح العنوان
+  docTitleHint.textContent = '— ' + currentTitle();
+
+  // استعادة التعليقات ورسم الشارات
+  renderBadges();
+  renderPanel();
 
   // ===== أزرار العميل =====
   (document.getElementById('printBtn')||{}).onclick=()=>iframe.contentWindow.print();
@@ -216,6 +357,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }catch(e){}
   clientEmail.addEventListener('input', ()=>{ try{ localStorage.setItem('wf_client_email', clientEmail.value||''); }catch(e){} });
   clientWa.addEventListener('input', ()=>{ try{ localStorage.setItem('wf_client_wa', clientWa.value||''); }catch(e){} });
+
 });
 </script>
 </body>
