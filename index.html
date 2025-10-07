@@ -219,7 +219,7 @@
     const LS_KEY_CHMAP    = 'audit_chapter_templates_v1';
     const LS_KEY_SECTIONS = 'audit_sections_bundle_v1';
 
-    // ===== القوالب المدمجة (كاملة) =====
+    // ===== القوالب المدمجة =====
     const templates = {
       ar: {
         ch1:[
@@ -360,7 +360,7 @@
       });
     }
 
-    // ===== ربط أبواب بالتعبئة التلقائية =====
+    // ===== ربط أبواب للتعبئة =====
     function loadChapterMap(){ try{ return JSON.parse(localStorage.getItem(LS_KEY_CHMAP)) || {}; }catch{ return {}; } }
     function saveChapterMap(map){ try{ localStorage.setItem(LS_KEY_CHMAP, JSON.stringify(map)); }catch(e){ console.warn('save chapter map failed', e); } }
     const AR_DIGITS = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
@@ -390,17 +390,9 @@
       if(nm.includes('احتياطات') && nm.includes('السلامة')) return { ar: templates.ar.ch2, en: templates.en.ch2 };
       if(nm.includes('الحماية') && (nm.includes('الات') || nm.includes('الالات') || nm.includes('الآلات'))) return { ar: templates.ar.ch3, en: templates.en.ch3 };
       if(nm.includes('الوقاية') && nm.includes('الكهرباء')) return { ar: templates.ar.ch5, en: templates.en.ch5 };
-      if(nm.includes('الوقاية') && nm.includes('المخاطر الطبيعية')) return { ar: templates.ar.ch6, en: templates.en.ch6 };
-      if(nm.includes('الوقاية') && nm.includes('المخاطر الكيميائية')) return { ar: templates.ar.ch7, en: templates.en.ch7 };
       if(nm.includes('المرافق') && nm.includes('العامة')) return { ar: templates.ar.ch8, en: templates.en.ch8 };
       if(nm.includes('ergonomic')) return { ar: templates.ar.ergo, en: templates.en.ergo };
       if((nm.includes('handling') || nm.includes('storage')) && nm.includes('material')) return { ar: templates.ar.ch4, en: templates.en.ch4 };
-      if(nm.includes('safety') && nm.includes('health') && nm.includes('precautions')) return { ar: templates.ar.ch2, en: templates.en.ch2 };
-      if((nm.includes('machinery') || nm.includes('machine')) && (nm.includes('safety') || nm.includes('protection'))) return { ar: templates.ar.ch3, en: templates.en.ch3 };
-      if(nm.includes('electrical') && nm.includes('safety')) return { ar: templates.ar.ch5, en: templates.en.ch5 };
-      if(nm.includes('natural') && (nm.includes('hazard') || nm.includes('hazards'))) return { ar: templates.ar.ch6, en: templates.en.ch6 };
-      if((nm.includes('chemical') || nm.includes('hazardous')) && (nm.includes('safety') || nm.includes('substances'))) return { ar: templates.ar.ch7, en: templates.en.ch7 };
-      if(nm.includes('general facilities')) return { ar: templates.ar.ch8, en: templates.en.ch8 };
       return null;
     }
     function tryAutoFillFromChapter(){
@@ -443,7 +435,7 @@
     }
 
     function persist(){
-      const payload = { v:20, lang: state.lang, logoDataURL: state.logoDataURL, items: state.items, chapter: state.chapter, options: state.options, sections: state.sections };
+      const payload = { v:21, lang: state.lang, logoDataURL: state.logoDataURL, items: state.items, chapter: state.chapter, options: state.options, sections: state.sections };
       try{ localStorage.setItem(LS_KEY_DRAFT, JSON.stringify(payload)); } catch(e){ console.warn('persist failed', e); }
       try{ localStorage.setItem(LS_KEY_SECTIONS, JSON.stringify(state.sections)); } catch(e){}
     }
@@ -528,14 +520,14 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
     function onReorderDrop(e){ e.preventDefault(); const from=parseInt(e.dataTransfer.getData('text/plain'),10); const toTr=e.target.closest('tr'); if(!toTr) return; const to=parseInt(toTr.dataset.row,10); if(Number.isNaN(from)||Number.isNaN(to)||from===to) return; const arr=state.items[state.lang]; const [moved]=arr.splice(from,1); arr.splice(to,0,moved); renderTable(); persist(); }
 
     // لغة وحقول
-    els.langAr.onclick=()=>{ state.lang='ar'; updateTitle(); renderTable(); persist(); renderUserTemplates(); tryAutoFillFromChapter(); };
-    els.langEn.onclick=()=>{ state.lang='en'; updateTitle(); renderTable(); persist(); renderUserTemplates(); tryAutoFillFromChapter(); };
-    document.getElementById('optAutoFill').onchange=()=>{ state.options.autoFill = document.getElementById('optAutoFill').checked; persist(); };
-    document.getElementById('optChecks').onchange=()=>{ state.options.includeChecks = document.getElementById('optChecks').checked; persist(); };
-    document.getElementById('optRisk').onchange=()=>{ state.options.includeRisk = document.getElementById('optRisk').checked; persist(); };
-    document.getElementById('optBorderW').oninput=()=>{ state.options.borderW=+document.getElementById('optBorderW').value||0; persist(); };
-    document.getElementById('optBorderColor').oninput=()=>{ state.options.borderColor=document.getElementById('optBorderColor').value; persist(); };
-    document.getElementById('optLogoIn').oninput=()=>{ state.options.logoIn=+document.getElementById('optLogoIn').value||1.0; persist(); };
+    langAr.onclick=()=>{ state.lang='ar'; updateTitle(); renderTable(); persist(); renderUserTemplates(); tryAutoFillFromChapter(); };
+    langEn.onclick=()=>{ state.lang='en'; updateTitle(); renderTable(); persist(); renderUserTemplates(); tryAutoFillFromChapter(); };
+    optAutoFill.onchange=()=>{ state.options.autoFill = optAutoFill.checked; persist(); };
+    optChecks.onchange=()=>{ state.options.includeChecks = optChecks.checked; persist(); };
+    optRisk.onchange=()=>{ state.options.includeRisk = optRisk.checked; persist(); };
+    optBorderW.oninput=()=>{ state.options.borderW=+optBorderW.value||0; persist(); };
+    optBorderColor.oninput=()=>{ state.options.borderColor=optBorderColor.value; persist(); };
+    optLogoIn.oninput=()=>{ state.options.logoIn=+optLogoIn.value||1.0; persist(); };
 
     els.chapterNo.addEventListener('input', ()=>{ state.chapter.number=els.chapterNo.value; updateTitle(); tryAutoFillFromChapter(); persist(); });
     els.chapterName.addEventListener('input', ()=>{ state.chapter.name=els.chapterName.value; updateTitle(); tryAutoFillFromChapter(); persist(); });
@@ -546,7 +538,7 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
     els.addRow.onclick=()=>{ const ph=state.lang==='ar'? '* بند جديد':'* New Item'; state.items[state.lang].unshift(ph); renderTable(); persist(); };
     els.deleteChecked.onclick=()=>{ const keep=[]; document.querySelectorAll('#tbl tbody tr').forEach(r=>{ const checked=r.querySelector('.pick').checked; const text=r.cells[1].innerText.trim(); if(!checked) keep.push(text); }); state.items[state.lang]=keep; renderTable(); persist(); };
 
-    // سحب إفلات
+    // سحب إفلات + تعديل خلايا
     els.tbody.addEventListener('dragstart', e=>{ const tr=e.target.closest('tr'); if(!tr) return; tr.classList.add('dragging'); e.dataTransfer.setData('text/plain', tr.dataset.row); });
     els.tbody.addEventListener('dragend', e=>{ const tr=e.target.closest('tr'); if(tr) tr.classList.remove('dragging'); });
     els.tbody.addEventListener('dragover', e=> e.preventDefault());
@@ -562,7 +554,7 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
       r.readAsDataURL(file);
     });
 
-    // قوالب
+    // قوالب جاهزة
     (els.tplCh1||{}).onclick=()=> askAndApply('ch1');
     (els.tplCh2||{}).onclick=()=> askAndApply('ch2');
     (els.tplCh3||{}).onclick=()=> askAndApply('ch3');
@@ -597,12 +589,10 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
       const lines=normalizeLines(els.dlgText.value||''); if(!lines.length){ alert('لا توجد بنود.'); return; }
       if(els.dlgMode.value==='replace') state.items[state.lang]=lines; else state.items[state.lang].push(...lines);
       const no=els.dlgNo.value.trim(); const nm=els.dlgName.value.trim();
-      // اختياري: نسخ للغة الأخرى
       if(els.dlgCopyToEn.checked){
         if(state.lang==='ar'){ state.items.en = lines.slice(); } else { state.items.ar = lines.slice(); }
       }
-      // اختياري: ربط كباب للتعبئة تلقائيًا مستقبلًا
-      if(els.dlgBind.checked && (no||nm)){
+      if(els.dlgBindChapter.checked && (no||nm)){
         const arrAr = (state.lang==='ar')? lines.slice() : (state.items.ar||[]).slice();
         const arrEn = (state.lang==='en')? lines.slice() : (state.items.en||[]).slice();
         setChapterTemplate(no,nm, arrAr, arrEn);
@@ -612,7 +602,7 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
       renderTable(); updateTitle(); persist(); renderUserTemplates(); els.dlg.close();
     };
 
-    // طباعة هذا الباب
+    // طباعة هذا الباب مباشرة (نسخة العميل)
     els.exportPdf.onclick=()=>{
       const sec={ no:els.chapterNo.value.trim(), name:els.chapterName.value.trim(),
         itemsAr:(state.lang==='ar'? getCheckedItemsText(): state.items.ar.slice()),
@@ -622,7 +612,7 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
     };
     els.printBtn.onclick=()=> window.print();
 
-    // ===== تصدير الباب الحالي (HTML) إلى client_flow.html بمفتاح فريد =====
+    // ===== تصدير الباب الحالي (HTML) إلى client_flow.html باستخدام localStorage =====
     els.exportThisHtml.onclick=()=>{
       const sec = {
         no: (els.chapterNo.value||'').trim(),
@@ -631,12 +621,15 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
         itemsEn: (state.lang==='en') ? getCheckedItemsText() : (state.items.en||[]).slice()
       };
       const html = buildClientHTMLOne(sec);
-      const key  = `client_preview_single_${Date.now()}`;
-      try { sessionStorage.setItem(key, html); } catch(e){}
+      const key  = `client_preview_key_${Date.now()}`;
+      try {
+        localStorage.setItem(key, html);
+        localStorage.setItem('client_preview_html', html); // احتياطي
+      } catch(e){}
       window.open(`client_flow.html?k=${encodeURIComponent(key)}`, '_blank');
     };
 
-    // ===== باب-باب: تجميع وتصدير لكل باب تبويب مستقل =====
+    // ===== باب-باب: تجميع وتصدير لكل باب تبويب مستقل (localStorage) =====
     function saveSections(){ try{ localStorage.setItem(LS_KEY_SECTIONS, JSON.stringify(state.sections)); }catch{} }
 
     els.bundleAdd.onclick=()=>{
@@ -659,13 +652,13 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
       if(!(state.sections && state.sections.length)){ alert('لا توجد أبواب مجمعة. أضف أولاً.'); return; }
       if(state.sections.length>6 && !confirm(`سيتم فتح ${state.sections.length} تبويبات.\nقد يمنع المتصفح ذلك. المتابعة؟`)) return;
 
-      const flowPath = 'client_flow.html'; // عدّل لو الملف في مجلد آخر
+      const flowPath = 'client_flow.html';
       const ts = Date.now();
 
       state.sections.forEach((sec, i)=>{
         const html = buildClientHTMLOne(sec);
         const key = `client_preview_key_${ts}_${i}`;
-        try { sessionStorage.setItem(key, html); } catch(e){ console.warn('sessionStorage failed', e); }
+        try { localStorage.setItem(key, html); } catch(e){ console.warn('localStorage failed', e); }
         window.open(`${flowPath}?k=${encodeURIComponent(key)}`, '_blank');
       });
     };
@@ -678,13 +671,12 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
         out.push('— بنود AR/EN: '+(state.items.ar?.length||0)+' / '+(state.items.en?.length||0));
         out.push('— أقسام مجمعة: '+(state.sections?.length||0));
         try{ const s=buildClientHTMLOne({no:'1',name:'تجربة',itemsAr:['اختبار'],itemsEn:['Test']}); out.push('— بناء HTML: ✅ '+s.length+' chars'); }catch(e){ out.push('— بناء HTML: ❌ '+e.message); }
-        els.testOut.textContent=out.join('\n');
+        document.getElementById('testOut').textContent=out.join('\n');
       };
     }
 
     // بداية التشغيل
     restore();
-    // إن لم توجد مسودة، جهّز افتراضيًا باب 1 كامل
     if(!(state.items.ar.length||state.items.en.length)){
       state.items.ar = templates.ar.ch1.slice();
       state.items.en = templates.en.ch1.slice();
