@@ -129,7 +129,7 @@
       <button class="btn" id="deleteChecked">🗑️ حذف البنود المحددة</button>
       <span style="flex:1"></span>
 
-      <!-- تصدير الباب الحالي مباشرة -->
+      <!-- تصدير الباب الحالي -->
       <button class="btn" id="exportThisHtml">⬇️ تصدير هذا الباب (HTML)</button>
 
       <!-- باب-باب -->
@@ -314,6 +314,13 @@
       tplCh7: document.getElementById('tplCh7'),
       tplCh8: document.getElementById('tplCh8'),
       tplErgo: document.getElementById('tplErgo'),
+      // خصائص
+      optAutoFill: document.getElementById('optAutoFill'),
+      optChecks: document.getElementById('optChecks'),
+      optRisk: document.getElementById('optRisk'),
+      optBorderW: document.getElementById('optBorderW'),
+      optBorderColor: document.getElementById('optBorderColor'),
+      optLogoIn: document.getElementById('optLogoIn'),
       // باب-باب
       bundleAdd: document.getElementById('bundleAdd'),
       bundleClear: document.getElementById('bundleClear'),
@@ -435,7 +442,7 @@
     }
 
     function persist(){
-      const payload = { v:21, lang: state.lang, logoDataURL: state.logoDataURL, items: state.items, chapter: state.chapter, options: state.options, sections: state.sections };
+      const payload = { v:22, lang: state.lang, logoDataURL: state.logoDataURL, items: state.items, chapter: state.chapter, options: state.options, sections: state.sections };
       try{ localStorage.setItem(LS_KEY_DRAFT, JSON.stringify(payload)); } catch(e){ console.warn('persist failed', e); }
       try{ localStorage.setItem(LS_KEY_SECTIONS, JSON.stringify(state.sections)); } catch(e){}
     }
@@ -454,12 +461,12 @@
       }
       els.chapterNo.value = state.chapter.number || '';
       els.chapterName.value = state.chapter.name || '';
-      document.getElementById('optChecks').checked = !!state.options.includeChecks;
-      document.getElementById('optRisk').checked = !!state.options.includeRisk;
-      document.getElementById('optBorderW').value = state.options.borderW;
-      document.getElementById('optBorderColor').value = state.options.borderColor;
-      document.getElementById('optLogoIn').value = state.options.logoIn;
-      document.getElementById('optAutoFill').checked = !!state.options.autoFill;
+      els.optChecks.checked = !!state.options.includeChecks;
+      els.optRisk.checked = !!state.options.includeRisk;
+      els.optBorderW.value = state.options.borderW;
+      els.optBorderColor.value = state.options.borderColor;
+      els.optLogoIn.value = state.options.logoIn;
+      els.optAutoFill.checked = !!state.options.autoFill;
       if(state.logoDataURL){ els.companyLogo.hidden=false; }
       updateTitle(); renderTable(); renderUserTemplates();
     }
@@ -520,14 +527,14 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
     function onReorderDrop(e){ e.preventDefault(); const from=parseInt(e.dataTransfer.getData('text/plain'),10); const toTr=e.target.closest('tr'); if(!toTr) return; const to=parseInt(toTr.dataset.row,10); if(Number.isNaN(from)||Number.isNaN(to)||from===to) return; const arr=state.items[state.lang]; const [moved]=arr.splice(from,1); arr.splice(to,0,moved); renderTable(); persist(); }
 
     // لغة وحقول
-    langAr.onclick=()=>{ state.lang='ar'; updateTitle(); renderTable(); persist(); renderUserTemplates(); tryAutoFillFromChapter(); };
-    langEn.onclick=()=>{ state.lang='en'; updateTitle(); renderTable(); persist(); renderUserTemplates(); tryAutoFillFromChapter(); };
-    optAutoFill.onchange=()=>{ state.options.autoFill = optAutoFill.checked; persist(); };
-    optChecks.onchange=()=>{ state.options.includeChecks = optChecks.checked; persist(); };
-    optRisk.onchange=()=>{ state.options.includeRisk = optRisk.checked; persist(); };
-    optBorderW.oninput=()=>{ state.options.borderW=+optBorderW.value||0; persist(); };
-    optBorderColor.oninput=()=>{ state.options.borderColor=optBorderColor.value; persist(); };
-    optLogoIn.oninput=()=>{ state.options.logoIn=+optLogoIn.value||1.0; persist(); };
+    els.langAr.onclick=()=>{ state.lang='ar'; updateTitle(); renderTable(); persist(); renderUserTemplates(); tryAutoFillFromChapter(); };
+    els.langEn.onclick=()=>{ state.lang='en'; updateTitle(); renderTable(); persist(); renderUserTemplates(); tryAutoFillFromChapter(); };
+    els.optAutoFill.onchange=()=>{ state.options.autoFill = els.optAutoFill.checked; persist(); };
+    els.optChecks.onchange=()=>{ state.options.includeChecks = els.optChecks.checked; persist(); };
+    els.optRisk.onchange=()=>{ state.options.includeRisk = els.optRisk.checked; persist(); };
+    els.optBorderW.oninput=()=>{ state.options.borderW=+els.optBorderW.value||0; persist(); };
+    els.optBorderColor.oninput=()=>{ state.options.borderColor=els.optBorderColor.value; persist(); };
+    els.optLogoIn.oninput=()=>{ state.options.logoIn=+els.optLogoIn.value||1.0; persist(); };
 
     els.chapterNo.addEventListener('input', ()=>{ state.chapter.number=els.chapterNo.value; updateTitle(); tryAutoFillFromChapter(); persist(); });
     els.chapterName.addEventListener('input', ()=>{ state.chapter.name=els.chapterName.value; updateTitle(); tryAutoFillFromChapter(); persist(); });
@@ -612,8 +619,8 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
     };
     els.printBtn.onclick=()=> window.print();
 
-    // ===== تصدير الباب الحالي (HTML) إلى client_flow.html باستخدام localStorage =====
-    els.exportThisHtml.onclick=()=>{
+    // ===== تصدير الباب الحالي (HTML) إلى client_flow.html باستخدام localStorage + Fallback =====
+    els.exportThisHtml.onclick = async () => {
       const sec = {
         no: (els.chapterNo.value||'').trim(),
         name: (els.chapterName.value||'').trim(),
@@ -622,14 +629,28 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
       };
       const html = buildClientHTMLOne(sec);
       const key  = `client_preview_key_${Date.now()}`;
+
       try {
         localStorage.setItem(key, html);
-        localStorage.setItem('client_preview_html', html); // احتياطي
-      } catch(e){}
-      window.open(`client_flow.html?k=${encodeURIComponent(key)}`, '_blank');
+        localStorage.setItem('client_preview_html', html); // احتياطي/توافق
+      } catch(e) {}
+
+      const flowUrl = new URL('./client_flow.html', window.location.href);
+      try {
+        const head = await fetch(flowUrl.href, { method:'HEAD', cache:'no-store' });
+        if (head.ok) {
+          window.open(`${flowUrl.href}?k=${encodeURIComponent(key)}`, '_blank');
+        } else {
+          const w = window.open('', '_blank');
+          w.document.open(); w.document.write(html); w.document.close();
+        }
+      } catch {
+        const w = window.open('', '_blank');
+        w.document.open(); w.document.write(html); w.document.close();
+      }
     };
 
-    // ===== باب-باب: تجميع وتصدير لكل باب تبويب مستقل (localStorage) =====
+    // ===== باب-باب: تجميع وتصدير لكل باب تبويب مستقل (localStorage + Fallback) =====
     function saveSections(){ try{ localStorage.setItem(LS_KEY_SECTIONS, JSON.stringify(state.sections)); }catch{} }
 
     els.bundleAdd.onclick=()=>{
@@ -648,18 +669,28 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
 
     els.bundleClear.onclick=()=>{ if(confirm('تفريغ الأبواب المجمعة؟')){ state.sections=[]; saveSections(); persist(); alert('تم التفريغ.'); } };
 
-    els.bundleExport.onclick=()=>{
+    els.bundleExport.onclick=async ()=>{
       if(!(state.sections && state.sections.length)){ alert('لا توجد أبواب مجمعة. أضف أولاً.'); return; }
       if(state.sections.length>6 && !confirm(`سيتم فتح ${state.sections.length} تبويبات.\nقد يمنع المتصفح ذلك. المتابعة؟`)) return;
 
-      const flowPath = 'client_flow.html';
-      const ts = Date.now();
+      const flowUrl = new URL('./client_flow.html', window.location.href);
+      let flowOk = false;
+      try{
+        const head = await fetch(flowUrl.href, { method:'HEAD', cache:'no-store' });
+        flowOk = head.ok;
+      }catch{}
 
+      const ts = Date.now();
       state.sections.forEach((sec, i)=>{
         const html = buildClientHTMLOne(sec);
         const key = `client_preview_key_${ts}_${i}`;
-        try { localStorage.setItem(key, html); } catch(e){ console.warn('localStorage failed', e); }
-        window.open(`${flowPath}?k=${encodeURIComponent(key)}`, '_blank');
+        try { localStorage.setItem(key, html); } catch(e){}
+        if(flowOk){
+          window.open(`${flowUrl.href}?k=${encodeURIComponent(key)}`, '_blank');
+        }else{
+          const w = window.open('', '_blank');
+          w.document.open(); w.document.write(html); w.document.close();
+        }
       });
     };
 
@@ -671,7 +702,7 @@ td.note{min-height:40px;max-height:60px;overflow-y:auto;white-space:pre-wrap;wor
         out.push('— بنود AR/EN: '+(state.items.ar?.length||0)+' / '+(state.items.en?.length||0));
         out.push('— أقسام مجمعة: '+(state.sections?.length||0));
         try{ const s=buildClientHTMLOne({no:'1',name:'تجربة',itemsAr:['اختبار'],itemsEn:['Test']}); out.push('— بناء HTML: ✅ '+s.length+' chars'); }catch(e){ out.push('— بناء HTML: ❌ '+e.message); }
-        document.getElementById('testOut').textContent=out.join('\n');
+        els.testOut.textContent=out.join('\n');
       };
     }
 
