@@ -1,364 +1,453 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>نسخة العمل (Work Flow) – Ergonomic Industrial</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>نسخة العميل – قائمة تدقيق قابلة للطباعة والإرسال</title>
 <style>
-:root{--bg:#f7f8fb;--ink:#111;--card:#fff;--accent:#2563eb;--muted:#666;--warn:#f59e0b}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Kufi Arabic","Cairo",sans-serif}
-.wrap{max-width:920px;margin:auto;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 0 12px rgba(0,0,0,.1)}
-h1{margin:0 0 10px;text-align:center;color:var(--accent);font-size:20px}
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:12px 0}
-.btn{padding:8px 14px;border:1px solid #ddd;border-radius:10px;background:#fff;cursor:pointer;font-size:14px}
-.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn.warn{background:#fee2e2;border-color:#ef4444}
-.btn.on{outline:2px solid var(--accent)}
-.btn[disabled]{opacity:.45;cursor:not-allowed}
-.group{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-.small{font-size:.9rem;color:var(--muted)}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;max-width:780px;margin:0 auto}
-.row label{display:block;font-size:.9rem;color:#333}
-input[type="text"],input[type="email"],input[type="tel"]{padding:8px 10px;border:1px solid #ccc;border-radius:10px;width:100%}
-select{padding:8px 10px;border:1px solid #ccc;border-radius:10px}
-iframe{width:100%;height:78vh;border:none;border-radius:8px;background:#fff}
-footer{text-align:center;font-size:.85rem;color:var(--muted);margin-top:10px}
-@media(max-width:720px){.row{grid-template-columns:1fr} iframe{height:72vh}}
-@media print{.no-print{display:none}}
-
-/* شارة التعليق داخل نسخة العميل */
-.cmt-badge{display:inline-block;background:#fef3c7;border:1px solid var(--warn);border-radius:6px;padding:0 6px;font-size:12px;margin-inline-start:6px;white-space:nowrap}
-.cmt-badge::before{content:"💬 "}
-
-/* لوحة جانبية بسيطة لإحصاء التعليقات */
-#cmtPanel{position:fixed;inset-inline-end:10px;bottom:10px;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.08);padding:10px 12px;max-width:320px;max-height:45vh;overflow:auto}
-#cmtPanel h3{margin:.2rem 0 .4rem;font-size:14px;color:#333}
-#cmtPanel .item{font-size:13px;border-top:1px dashed #eee;padding:6px 0}
-#cmtPanel .meta{color:#666;font-size:12px}
+  :root{
+    --bg:#f7f8fb;--ink:#111;--muted:#666;--line:#e5e7eb;--card:#fff;--accent:#2563eb
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Kufi Arabic","Cairo",Tahoma,Arial,sans-serif}
+  .wrap{max-width:1100px;margin:auto;padding:16px}
+  .card{background:var(--card);border:1px solid #ddd;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  .row{display:grid;gap:12px}
+  @media(min-width:768px){.row{grid-template-columns:repeat(12,1fr)}.col-3{grid-column:span 3}.col-4{grid-column:span 4}.col-6{grid-column:span 6}.col-8{grid-column:span 8}.col-12{grid-column:span 12}}
+  h1{margin:.3rem 0 1rem;font-size:22px}
+  h2{margin:1rem 0 .5rem;font-size:18px}
+  label{font-size:14px;color:#333}
+  input[type="text"], input[type="date"], select, textarea{
+    width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff
+  }
+  textarea{min-height:72px}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border:1px solid #e5e7eb;padding:8px;vertical-align:top}
+  th{background:#eef2ff}
+  .muted{color:var(--muted);font-size:13px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .btn{padding:10px 14px;border-radius:12px;border:1px solid #cfd8ff;background:#fff;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.ghost{background:#fff;border:1px solid #ddd}
+  .btn.warn{background:#fee2e2;border-color:#fecaca}
+  .center{display:flex;align-items:center;gap:10px}
+  .pill{display:inline-flex;gap:6px;align-items:center;padding:4px 10px;border:1px solid #ddd;border-radius:999px;background:#fff;font-size:12px}
+  .logo{height:64px;object-fit:contain}
+  .hidden{display:none !important}
+  .hr{height:1px;background:var(--line);margin:10px 0}
+  .notice{background:#fef9c3;border:1px solid #fde68a;color:#854d0e;padding:10px;border-radius:10px;font-size:13px}
+  .badge{background:#e5edff;color:#1e3a8a;border-radius:999px;padding:2px 8px;font-size:12px}
+  /* طباعة */
+  @media print{
+    .no-print{display:none !important}
+    body{background:#fff}
+    .card{border:0;box-shadow:none}
+    a[href]:after{content:"" !important}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🧾 نسخة العمل (Work Flow) – Ergonomic Industrial</h1>
+  <div class="card" id="admin">
+    <div class="row">
+      <div class="col-12 center" style="justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div class="center" style="gap:12px">
+          <img id="logo" class="logo" alt="logo" hidden>
+          <div>
+            <h1>🧾 لوحة إعداد <span class="badge">نسخة العميل</span></h1>
+            <div class="muted">أدخل البيانات، اختر البنود، ثم اضغط “إنشاء نسخة العميل”. يعمل على المتصفح والهاتف والتابلت (Android / iOS) بدون إنترنت.</div>
+          </div>
+        </div>
+        <label class="pill no-print"><input type="file" id="logoInput" accept="image/*"> شعار الشركة</label>
+      </div>
+    </div>
 
-  <!-- اختيار الدور -->
-  <div class="toolbar no-print">
-    <label class="small">الدور:</label>
-    <select id="role">
-      <option value="client">👤 عميل</option>
-      <option value="auditor">🕵️ مدقّق</option>
-      <option value="designer">🛠️ مصمّم</option>
-    </select>
-    <span class="small" id="docTitleHint"></span>
+    <div class="row">
+      <div class="col-3"><label>رقم الباب<br><input id="gateNo" type="text" placeholder="مثل: 3"></label></div>
+      <div class="col-6"><label>اسم الباب<br><input id="gateName" type="text" placeholder="الحماية من الآلات"></label></div>
+      <div class="col-3"><label>تاريخ اليوم<br><input id="todayInput" type="date"></label></div>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <div class="col-6"><label>اسم العميل<br><input id="clientName" type="text" placeholder="اسم العميل"></label></div>
+      <div class="col-6"><label>اسم الموقع<br><input id="siteName" type="text" placeholder="موقع العمل"></label></div>
+    </div>
+
+    <div class="toolbar no-print">
+      <button class="btn ghost" id="addRow">➕ إضافة بند</button>
+      <button class="btn ghost" id="selectAll">✔️ تحديد الكل</button>
+      <button class="btn ghost" id="clearAll">❌ إلغاء التحديد</button>
+      <span class="pill">نوع الاستجابة الافتراضي:
+        <select id="defaultResp">
+          <option value="yn">صح/خطأ</option>
+          <option value="rate">تقييم 1–5</option>
+        </select>
+      </span>
+      <span class="pill">بحث: <input id="filter" type="text" placeholder="فلتر البنود" style="border:0"></span>
+      <button class="btn" id="saveDraft">💾 حفظ كمسودة (محلي)</button>
+      <button class="btn warn" id="reset">إعادة التعيين</button>
+    </div>
+
+    <div class="notice no-print">ملاحظة: "ملاحظة العميل" في النسخة النهائية محددة بـ 50 حرفًا تلقائيًا.</div>
+
+    <table id="adminTable">
+      <thead>
+        <tr>
+          <th style="width:80px">تضمين</th>
+          <th>نص البند (قابل للتعديل)</th>
+          <th style="width:160px">نوع الاستجابة</th>
+          <th style="width:60px">حذف</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <!-- صفوف ديناميكية -->
+      </tbody>
+    </table>
+
+    <div class="toolbar no-print">
+      <button class="btn primary" id="makeClient">🚀 إنشاء نسخة العميل</button>
+      <button class="btn" id="exportHTML">⬇️ تصدير نسخة HTML</button>
+      <span class="muted">سيتم تضمين فقط الصفوف المحددة.</span>
+    </div>
   </div>
 
-  <!-- وسائل التواصل -->
-  <div class="row no-print" style="margin-bottom:6px">
-    <div>
-      <label>📧 بريد العميل (للإرسال من المدقّق للعميل):</label>
-      <input id="clientEmail" type="email" placeholder="example@company.com">
+  <!-- منطقة نسخة العميل -->
+  <div class="card hidden" id="client">
+    <div class="center" style="justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div class="center" style="gap:12px">
+        <img id="logoClient" class="logo" alt="logo" hidden>
+        <div>
+          <h1>✅ نسخة العميل – قائمة التدقيق</h1>
+          <div class="muted" id="meta"></div>
+        </div>
+      </div>
+      <span class="pill">التاريخ: <span id="clientDate"></span></span>
     </div>
-    <div>
-      <label>💬 واتساب العميل (رقم دولي مثل 9665xxxxxxx):</label>
-      <input id="clientWa" type="tel" placeholder="9665xxxxxxxx">
+
+    <div class="hr"></div>
+
+    <div class="row">
+      <div class="col-6"><label>اسم المدقق<br><input id="auditorName" type="text" placeholder="اسم المدقق"></label></div>
+      <div class="col-6"><label>تاريخ التفتيش<br><input id="inspectDate" type="date"></label></div>
+    </div>
+
+    <h2> البنود المطلوب التحقق منها</h2>
+    <form id="clientForm"></form>
+
+    <div class="toolbar no-print">
+      <button class="btn primary" id="printBtn">🖨️ طباعة</button>
+      <button class="btn" id="sendWA">📲 إرسال عبر واتساب</button>
+      <button class="btn" id="sendEmail">✉️ إرسال عبر البريد</button>
+      <button class="btn ghost" id="backToAdmin">↩️ تعديل الإعدادات</button>
     </div>
   </div>
-
-  <!-- أزرار حسب الدور -->
-  <div class="toolbar no-print">
-    <div class="group" data-role="client">
-      <button class="btn primary" id="printBtn">🖨️ طباعة / PDF</button>
-      <button class="btn" id="sendWhatsApp">💬 إرسال عبر واتساب</button>
-      <button class="btn" id="sendEmailAuditor">✉️ إرسال للمصمّم (ergonomicindustrial@gmail.com)</button>
-      <button class="btn" id="downloadHtml">⬇️ تنزيل كـ HTML</button>
-      <button class="btn" id="shareGeneral">📤 مشاركة</button>
-      <button class="btn" id="saveLocal">💾 حفظ الملاحظات محليًا</button>
-      <button class="btn" id="toggleComment">📝 وضع التعليق (تشغيل/إيقاف)</button>
-    </div>
-
-    <div class="group" data-role="auditor">
-      <button class="btn primary" id="printBtn2">🖨️ طباعة / PDF</button>
-      <button class="btn" id="resendToClientWA">🔁 إعادة إرسال للعميل (واتساب)</button>
-      <button class="btn" id="resendToClientMail">🔁 إعادة إرسال للعميل (إيميل)</button>
-      <button class="btn" id="downloadHtml2">⬇️ تنزيل كـ HTML</button>
-      <button class="btn" id="saveLocal2">💾 حفظ الملاحظات</button>
-      <button class="btn" id="toggleComment2">📝 وضع التعليق (تشغيل/إيقاف)</button>
-      <span class="small">اضغط على أي سطر داخل الجدول لإضافة تعليق.</span>
-    </div>
-
-    <div class="group" data-role="designer">
-      <button class="btn primary" id="printBtn3">🖨️ طباعة / PDF</button>
-      <button class="btn" id="downloadHtml3">⬇️ تنزيل كـ HTML</button>
-      <button class="btn" id="shareGeneral3">📤 مشاركة</button>
-      <button class="btn" id="toggleComment3">📝 وضع التعليق (تشغيل/إيقاف)</button>
-    </div>
-  </div>
-
-  <iframe id="preview"></iframe>
-  <div id="cmtPanel" class="no-print" style="display:none"></div>
-  <footer class="no-print">Ergonomic Industrial © جميع الحقوق محفوظة</footer>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded',()=>{
-  const iframe = document.getElementById('preview');
-  const roleSel = document.getElementById('role');
-  const docTitleHint = document.getElementById('docTitleHint');
-  const clientEmail = document.getElementById('clientEmail');
-  const clientWa = document.getElementById('clientWa');
-  const cmtPanel = document.getElementById('cmtPanel');
-  const btnsToggle = [ 'toggleComment','toggleComment2','toggleComment3' ].map(id=>document.getElementById(id));
+  const els = {
+    logo: document.getElementById('logo'),
+    logoClient: document.getElementById('logoClient'),
+    logoInput: document.getElementById('logoInput'),
+    gateNo: document.getElementById('gateNo'),
+    gateName: document.getElementById('gateName'),
+    todayInput: document.getElementById('todayInput'),
+    clientName: document.getElementById('clientName'),
+    siteName: document.getElementById('siteName'),
+    defaultResp: document.getElementById('defaultResp'),
+    tbody: document.getElementById('tbody'),
+    addRow: document.getElementById('addRow'),
+    selectAll: document.getElementById('selectAll'),
+    clearAll: document.getElementById('clearAll'),
+    filter: document.getElementById('filter'),
+    saveDraft: document.getElementById('saveDraft'),
+    reset: document.getElementById('reset'),
+    makeClient: document.getElementById('makeClient'),
+    exportHTML: document.getElementById('exportHTML'),
+    admin: document.getElementById('admin'),
+    client: document.getElementById('client'),
+    clientForm: document.getElementById('clientForm'),
+    meta: document.getElementById('meta'),
+    clientDate: document.getElementById('clientDate'),
+    auditorName: document.getElementById('auditorName'),
+    inspectDate: document.getElementById('inspectDate'),
+    printBtn: document.getElementById('printBtn'),
+    sendWA: document.getElementById('sendWA'),
+    sendEmail: document.getElementById('sendEmail'),
+    backToAdmin: document.getElementById('backToAdmin')
+  };
 
-  // ===== تحميل النسخة من localStorage (?k) ثم fallback إلى client_preview_html =====
-  function loadHtmlFromStore(){
-    const params=new URLSearchParams(location.search);
-    const k=params.get('k');
-    let html=null;
-    if(k){ try{ html=localStorage.getItem(k); }catch(e){} }
-    if(!html){ try{ html=localStorage.getItem('client_preview_html'); }catch(e){} }
-    return html;
-  }
+  const state = {
+    logoDataURL: '',
+    rows: [], // {id, include, text, kind}
+  };
 
-  const html = loadHtmlFromStore();
-  if(!html){
-    document.body.innerHTML = `
-      <div style="max-width:600px;margin:auto;text-align:center;padding:50px;">
-        <h2 style="color:#b91c1c;">❌ لا توجد بيانات للعرض</h2>
-        <p>افتح هذه الصفحة عبر زر <strong>"تصدير هذا الباب (HTML)"</strong> أو <strong>"تصدير باب-باب"</strong> من <code>index.html</code>.</p>
-      </div>`;
-    return;
-  }
+  // تاريخ اليوم افتراضياً
+  const todayISO = new Date().toISOString().slice(0,10);
+  els.todayInput.value = todayISO;
 
-  // اكتب الـ HTML داخل الإطار (نفس الأصل)
-  const doc = iframe.contentDocument || iframe.contentWindow.document;
-  doc.open(); doc.write(html); doc.close();
+  // وظائف عامة
+  function uid(){return Math.random().toString(36).slice(2)}
 
-  // عنوان الوثيقة + مفتاح تخزين التعليقات
-  function currentTitle(){ try{ return (doc.title || 'نسخة التدقيق'); }catch(e){ return 'نسخة التدقيق'; } }
-  const CMTPREFIX = 'wf_comments_';
-  const cmtKey = CMTPREFIX + (currentTitle() || 'doc');
-
-  // تحميل/حفظ التعليقات
-  function loadComments(){
-    try{ return JSON.parse(localStorage.getItem(cmtKey)) || {}; }catch(e){ return {}; }
-  }
-  function saveComments(map){
-    try{ localStorage.setItem(cmtKey, JSON.stringify(map||{})); }catch(e){}
-  }
-
-  // ربط الدور
-  function applyRole(){
-    const role=roleSel.value;
-    document.querySelectorAll('[data-role]').forEach(el=>{
-      el.style.display = (el.getAttribute('data-role')===role)? 'flex':'none';
-    });
-  }
-  roleSel.addEventListener('change', applyRole);
-  applyRole();
-
-  // أدوات عامة
-  function toWaLink(phone, text){
-    const msg=encodeURIComponent(text||'');
-    const digits=(phone||'').replace(/[^\d]/g,'');
-    return digits? `https://wa.me/${digits}?text=${msg}` : `https://wa.me/?text=${msg}`;
-  }
-  function openMail(to, subject, body){
-    const s=encodeURIComponent(subject||''); const b=encodeURIComponent(body||'');
-    window.location.href=`mailto:${encodeURIComponent(to||'')}?subject=${s}&body=${b}`;
-  }
-  function getCurrentHtml(){
-    try{ return doc.documentElement.outerHTML; }catch(e){ return html; }
-  }
-  function makeFile(){
-    const blob=new Blob([getCurrentHtml()],{type:'text/html'});
-    return new File([blob], (currentTitle().replace(/[^\w\u0600-\u06FF\- ]+/g,'_') || 'Ergonomic-Checklist') + '.html', {type:'text/html'});
-  }
-  function shareOrDownload(shareText){
-    const file=makeFile();
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      navigator.share({title: currentTitle(), text: shareText||'مشاركة نسخة التدقيق', files:[file]});
-    }else{
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(file); a.download=file.name; a.click(); URL.revokeObjectURL(a.href);
-      alert('ℹ️ تم تنزيل الملف على جهازك. يمكنك إرفاقه بالواتساب/الإيميل يدويًا.');
-    }
-  }
-  function downloadOnly(){
-    const file=makeFile();
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(file); a.download=file.name; a.click(); URL.revokeObjectURL(a.href);
-  }
-  function saveLocalCopy(){
-    try{
-      localStorage.setItem('client_saved_html', getCurrentHtml());
-      alert('✅ تم حفظ النسخة (بالتعليقات/الملاحظات) محليًا.');
-    }catch(e){ alert('❌ تعذّر الحفظ.'); }
-  }
-
-  // ===== وضع التعليق داخل iframe =====
-  let commentMode = false;
-  let comments = loadComments(); // خريطة: { rowIndex: "نص التعليق" }
-
-  function renderBadges(){
-    try{
-      const rows = Array.from(doc.querySelectorAll('table tbody tr'));
-      rows.forEach((tr, idx)=>{
-        // احذف الشارة القديمة
-        const old = tr.querySelector('.cmt-badge');
-        if(old) old.remove();
-        // أضف إذا في تعليق
-        const txt = comments[idx];
-        if(txt){
-          const targetCell = tr.cells[1] || tr.cells[tr.cells.length-1];
-          if(targetCell){
-            const span = doc.createElement('span');
-            span.className = 'cmt-badge';
-            span.title = txt;
-            span.textContent = (txt.length>42? txt.slice(0,42)+'…' : txt);
-            targetCell.appendChild(span);
-          }
-        }
-      });
-    }catch(e){}
-  }
-
-  function openAddCommentDialog(rowIdx, current){
-    const t = prompt('أدخل التعليق لهذا السطر:', current || '');
-    if(t===null) return; // إلغاء
-    if(!t.trim()){
-      // حذف التعليق إن كان موجودًا
-      delete comments[rowIdx];
-    } else {
-      comments[rowIdx] = t.trim();
-    }
-    saveComments(comments);
-    renderBadges();
-    renderPanel();
-  }
-
-  function onIframeClick(e){
-    if(!commentMode) return;
-    const tr = e.target.closest('tr');
-    if(!tr) return;
-    const rows = Array.from(doc.querySelectorAll('table tbody tr'));
-    const rowIdx = rows.indexOf(tr);
-    if(rowIdx<0) return;
-    const existing = comments[rowIdx] || '';
-    openAddCommentDialog(rowIdx, existing);
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  function setCommentMode(on){
-    commentMode = !!on;
-    btnsToggle.forEach(btn=>{ if(btn){ btn.classList.toggle('on', commentMode); }});
-    if(commentMode){
-      doc.addEventListener('click', onIframeClick, true);
-      cmtPanel.style.display='block';
-    }else{
-      doc.removeEventListener('click', onIframeClick, true);
-      cmtPanel.style.display='none';
-    }
-  }
-
-  function renderPanel(){
-    const count = Object.keys(comments).length;
-    const rows = Array.from(doc.querySelectorAll('table tbody tr'));
-    const itemsHtml = Object.entries(comments).map(([idx, text])=>{
-      const i = parseInt(idx,10);
-      const itemTxt = rows[i]?.cells?.[1]?.innerText?.trim() || `السطر #${i+1}`;
-      return `<div class="item">
-        <div class="meta">سطر ${i+1}:</div>
-        <div>${(text||'').replace(/</g,'&lt;')}</div>
-        <div style="margin-top:6px">
-          <button data-act="go" data-i="${i}" class="btn" style="padding:2px 8px">انتقال</button>
-          <button data-act="edit" data-i="${i}" class="btn" style="padding:2px 8px">تعديل</button>
-          <button data-act="del" data-i="${i}" class="btn warn" style="padding:2px 8px">حذف</button>
-        </div>
-      </div>`;
-    }).join('') || `<div class="small">لا توجد تعليقات حتى الآن. فعّل وضع التعليق واضغط على سطر داخل الجدول.</div>`;
-    cmtPanel.innerHTML = `
-      <h3>💬 التعليقات (${count})</h3>
-      ${itemsHtml}
-      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-        <button id="cmtExport" class="btn">⬇️ تنزيل النسخة (بالتعليقات)</button>
-        <button id="cmtClear" class="btn warn">🗑️ حذف جميع التعليقات</button>
-      </div>
-    `;
-    // أحداث داخل اللوحة
-    cmtPanel.querySelectorAll('button[data-act]').forEach(b=>{
-      b.onclick = ()=>{
-        const act=b.dataset.act, i=parseInt(b.dataset.i,10);
-        const rows = Array.from(doc.querySelectorAll('table tbody tr'));
-        if(act==='go' && rows[i]) rows[i].scrollIntoView({behavior:'smooth', block:'center'});
-        if(act==='edit') openAddCommentDialog(i, comments[i]||'');
-        if(act==='del'){ delete comments[i]; saveComments(comments); renderBadges(); renderPanel(); }
-      };
-    });
-    const btnExport = cmtPanel.querySelector('#cmtExport');
-    if(btnExport) btnExport.onclick = downloadOnly;
-    const btnClear = cmtPanel.querySelector('#cmtClear');
-    if(btnClear) btnClear.onclick = ()=>{
-      if(confirm('حذف جميع التعليقات؟')){ comments={}; saveComments(comments); renderBadges(); renderPanel(); }
+  function persist(){
+    const draft = {
+      logo: state.logoDataURL,
+      gateNo: els.gateNo.value,
+      gateName: els.gateName.value,
+      date: els.todayInput.value,
+      clientName: els.clientName.value,
+      siteName: els.siteName.value,
+      defaultResp: els.defaultResp.value,
+      rows: state.rows
     };
+    localStorage.setItem('client_version_draft', JSON.stringify(draft));
   }
 
-  // تفعيل/تعطيل التعليق من الأزرار
-  btnsToggle.forEach(btn=>{ if(btn){ btn.onclick=()=> setCommentMode(!commentMode); }});
+  function loadDraft(){
+    const s = localStorage.getItem('client_version_draft');
+    if(!s) return;
+    try{
+      const d = JSON.parse(s);
+      state.logoDataURL = d.logo||'';
+      if(state.logoDataURL){ els.logo.src = state.logoDataURL; els.logo.hidden=false; }
+      els.gateNo.value = d.gateNo||'';
+      els.gateName.value = d.gateName||'';
+      els.todayInput.value = d.date||todayISO;
+      els.clientName.value = d.clientName||'';
+      els.siteName.value = d.siteName||'';
+      els.defaultResp.value = d.defaultResp||'yn';
+      state.rows = Array.isArray(d.rows)? d.rows:[];
+      renderTable();
+    }catch(e){console.warn('draft parse', e)}
+  }
 
-  // تلميح العنوان
-  docTitleHint.textContent = '— ' + currentTitle();
+  function renderTable(){
+    const q = els.filter.value.trim();
+    els.tbody.innerHTML = '';
+    state.rows
+      .filter(r=>!q || r.text.includes(q))
+      .forEach(r=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="text-align:center"><input type="checkbox" class="inc" ${r.include? 'checked':''} data-id="${r.id}"></td>
+          <td contenteditable="true" class="txt" data-id="${r.id}">${r.text}</td>
+          <td>
+            <select class="kind" data-id="${r.id}">
+              <option value="yn" ${r.kind==='yn'?'selected':''}>صح/خطأ</option>
+              <option value="rate" ${r.kind==='rate'?'selected':''}>تقييم 1–5</option>
+            </select>
+          </td>
+          <td style="text-align:center"><button class="btn warn del no-print" data-id="${r.id}">حذف</button></td>`;
+        els.tbody.appendChild(tr);
+      });
+  }
 
-  // استعادة التعليقات ورسم الشارات
-  renderBadges();
-  renderPanel();
+  function addRow(text){
+    state.rows.unshift({id:uid(), include:true, text:text||'* بند جديد', kind: els.defaultResp.value});
+    renderTable();
+    persist();
+  }
 
-  // ===== أزرار العميل =====
-  (document.getElementById('printBtn')||{}).onclick=()=>iframe.contentWindow.print();
-  (document.getElementById('sendWhatsApp')||{}).onclick=()=>{
-    const text = `مرحباً، هذه نسخة ${currentTitle()} من Ergonomic Industrial.`;
-    const link = toWaLink('', text);
-    window.open(link,'_blank');
+  // أحداث لوحة الإعداد
+  els.logoInput.addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if(!file){ state.logoDataURL=''; els.logo.hidden=true; return; }
+    const r = new FileReader();
+    r.onload = ev=>{ state.logoDataURL = ev.target.result; els.logo.src = state.logoDataURL; els.logo.hidden=false; persist(); };
+    r.readAsDataURL(file);
+  });
+
+  els.addRow.onclick = ()=> addRow();
+  els.selectAll.onclick = ()=>{ state.rows.forEach(r=>r.include=true); renderTable(); persist(); };
+  els.clearAll.onclick = ()=>{ state.rows.forEach(r=>r.include=false); renderTable(); persist(); };
+
+  els.tbody.addEventListener('input', e=>{
+    const id = e.target.getAttribute('data-id');
+    const row = state.rows.find(r=>r.id===id);
+    if(!row) return;
+    if(e.target.classList.contains('txt')) row.text = e.target.innerText.trim();
+    if(e.target.classList.contains('kind')) row.kind = e.target.value;
+    persist();
+  });
+  els.tbody.addEventListener('change', e=>{
+    const id = e.target.getAttribute('data-id');
+    const row = state.rows.find(r=>r.id===id);
+    if(!row) return;
+    if(e.target.classList.contains('inc')) row.include = e.target.checked;
+    persist();
+  });
+  els.tbody.addEventListener('click', e=>{
+    if(e.target.classList.contains('del')){
+      const id = e.target.getAttribute('data-id');
+      state.rows = state.rows.filter(r=>r.id!==id); renderTable(); persist();
+    }
+  });
+
+  els.filter.addEventListener('input', renderTable);
+
+  els.saveDraft.onclick = ()=>{ persist(); alert('تم الحفظ محليًا.'); };
+  els.reset.onclick = ()=>{
+    if(!confirm('إعادة التعيين ستفرّغ كل البيانات المخزنة محليًا. هل أنت متأكد؟')) return;
+    localStorage.removeItem('client_version_draft');
+    state.rows = []; els.logo.hidden=true; state.logoDataURL='';
+    els.gateNo.value=els.gateName.value=els.clientName.value=els.siteName.value='';
+    els.defaultResp.value='yn'; els.todayInput.value=todayISO; renderTable();
   };
-  (document.getElementById('sendEmailAuditor')||{}).onclick=()=>{
-    const subject = `${currentTitle()} – Ergonomic Industrial`;
-    const body = `السلام عليكم،\n\nأرسل لكم نسخة الباب للمراجعة.\nالعنوان: ${currentTitle()}\n\nتم الإنشاء من نظام Ergonomic Industrial.\n\n(ملاحظة: بإمكانكم الرد وإرفاق الملف المحفوظ.)`;
-    openMail('ergonomicindustrial@gmail.com', subject, body);
+
+  // إنشاء نسخة العميل داخل نفس الصفحة
+  els.makeClient.onclick = ()=>{
+    const selected = state.rows.filter(r=>r.include && r.text.trim());
+    if(selected.length===0){ alert('اختر بندًا واحدًا على الأقل.'); return; }
+
+    // رأس الصفحة
+    els.meta.textContent = `رقم الباب ${els.gateNo.value||'-'} – ${els.gateName.value||'-'} | العميل: ${els.clientName.value||'-'} | الموقع: ${els.siteName.value||'-'}`;
+    els.clientDate.textContent = els.todayInput.value || todayISO;
+
+    // الشعار
+    if(state.logoDataURL){ els.logoClient.src = state.logoDataURL; els.logoClient.hidden=false; }
+    else { els.logoClient.hidden=true; }
+
+    // بناء النموذج
+    els.clientForm.innerHTML = '';
+    selected.forEach((r, idx)=>{
+      const fieldId = `f_${idx}`;
+      const wrap = document.createElement('div');
+      wrap.className = 'card';
+      wrap.style.margin = '10px 0';
+      wrap.innerHTML = `
+        <div class="row">
+          <div class="col-12"><strong>${idx+1}.</strong> ${r.text}</div>
+          <div class="col-4">
+            <label>الاستجابة</label>
+            ${r.kind==='yn'
+              ? `<div class="center" style="gap:12px">
+                    <label class="pill"><input type="radio" name="resp_${fieldId}" value="صح"> صح</label>
+                    <label class="pill"><input type="radio" name="resp_${fieldId}" value="خطأ"> خطأ</label>
+                 </div>`
+              : `<select name="resp_${fieldId}">
+                    <option value="">— اختر التقييم —</option>
+                    <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+                 </select>`}
+          </div>
+          <div class="col-8"><label>ملاحظة (حتى 50 حرفًا)
+            <input type="text" name="note_${fieldId}" maxlength="50" placeholder="ملاحظة قصيرة">
+          </label></div>
+        </div>`;
+      els.clientForm.appendChild(wrap);
+    });
+
+    // تفعيل واجهة العميل
+    els.admin.classList.add('hidden');
+    els.client.classList.remove('hidden');
+
+    // تعيين تاريخ التفتيش افتراضيًا
+    els.inspectDate.value = els.todayInput.value || todayISO;
   };
-  (document.getElementById('downloadHtml')||{}).onclick=downloadOnly;
-  (document.getElementById('shareGeneral')||{}).onclick=()=>shareOrDownload('مشاركة نسخة التدقيق');
-  (document.getElementById('saveLocal')||{}).onclick=saveLocalCopy;
 
-  // ===== أزرار المدقّق =====
-  (document.getElementById('printBtn2')||{}).onclick=()=>iframe.contentWindow.print();
-  (document.getElementById('resendToClientWA')||{}).onclick=()=>{
-    const text = `تمت مراجعة ${currentTitle()}.\nيرجى الاطلاع وإعادة الإرسال بعد التحديث.`;
-    const link = toWaLink(clientWa.value, text);
-    window.open(link,'_blank');
+  // تصدير HTML ساكن لنسخة العميل (يمكن إرساله/فتحه لاحقًا)
+  els.exportHTML.onclick = ()=>{
+    const selected = state.rows.filter(r=>r.include && r.text.trim());
+    if(selected.length===0){ alert('اختر بندًا واحدًا على الأقل.'); return; }
+
+    const safe = s=>String(s||'').replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+    const blocks = selected.map((r,i)=>`
+      <div style="border:1px solid #ddd;border-radius:12px;padding:10px;margin:8px 0">
+        <div><strong>${i+1}.</strong> ${safe(r.text)}</div>
+        <div style="margin-top:6px">الاستجابة: ${r.kind==='yn'?'صح/خطأ':'تقييم 1–5'} | ملاحظة: حتى 50 حرفًا</div>
+      </div>`).join('');
+
+    const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>نسخة العميل (ساكنة)</title></head><body style="font-family:Tahoma,Arial,sans-serif;line-height:1.6">
+      ${state.logoDataURL?`<div><img src="${state.logoDataURL}" style="height:60px"></div>`:''}
+      <h2>نسخة العميل – قائمة التدقيق</h2>
+      <div>رقم الباب ${safe(els.gateNo.value)} – ${safe(els.gateName.value)} | العميل: ${safe(els.clientName.value)} | الموقع: ${safe(els.siteName.value)}</div>
+      <div>التاريخ: ${els.todayInput.value||todayISO}</div>
+      <hr>
+      ${blocks}
+      <hr>
+      <div>اسم المدقق: ____________ | توقيع: ____________ | التاريخ: ____________</div>
+      </body></html>`;
+
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `نسخة-العميل-${els.todayInput.value||todayISO}.html`; a.click();
+    URL.revokeObjectURL(url);
   };
-  (document.getElementById('resendToClientMail')||{}).onclick=()=>{
-    const subject = `مراجعة ${currentTitle()} – يرجى الاطلاع`;
-    const body = `السلام عليكم،\n\nأرفقت لكم ملاحظاتي على ${currentTitle()}.\nيرجى المراجعة ثم إعادة الإرسال.\n\nتحياتي.`;
-    openMail(clientEmail.value || '', subject, body);
+
+  // رجوع إلى الإعداد
+  els.backToAdmin.onclick = ()=>{ els.client.classList.add('hidden'); els.admin.classList.remove('hidden'); };
+
+  // طباعة
+  els.printBtn.onclick = ()=> window.print();
+
+  function buildSummaryText(){
+    // يبني نصًا لإرساله عبر الواتساب أو البريد
+    const lines = [];
+    lines.push(`نسخة العميل – قائمة التدقيق`);
+    lines.push(`الباب ${els.gateNo.value||'-'} – ${els.gateName.value||'-'}`);
+    lines.push(`العميل: ${els.clientName.value||'-'} | الموقع: ${els.siteName.value||'-'}`);
+    lines.push(`تاريخ: ${els.inspectDate.value||els.todayInput.value||todayISO}`);
+    lines.push('---');
+
+    // قراءة الحقول
+    const blocks = els.clientForm.querySelectorAll('.card');
+    blocks.forEach((b, i)=>{
+      const text = b.querySelector('div strong').parentNode.textContent.replace(/^\d+\.\s*/, '').trim();
+      const respName = `resp_f_${i}`;
+      let resp = '';
+      const radios = b.querySelectorAll(`input[name="resp_f_${i}"]`);
+      if(radios.length){
+        const checked = Array.from(radios).find(r=>r.checked);
+        resp = checked? checked.value: '';
+      } else {
+        const sel = b.querySelector('select[name="resp_f_'+i+'"]');
+        resp = sel? (sel.value||''):'';
+      }
+      const note = (b.querySelector(`input[name="note_f_${i}"]`)||{}).value||'';
+      lines.push(`${i+1}) ${text} | ${resp||'—'} ${note? ' | ملاحظة: '+note: ''}`);
+    });
+
+    lines.push('---');
+    lines.push(`المدقق: ${els.auditorName.value||'-'}`);
+    return lines.join('\n');
+  }
+
+  // واتساب
+  els.sendWA.onclick = ()=>{
+    const text = buildSummaryText();
+    const url = 'https://wa.me/?text=' + encodeURIComponent(text);
+    window.open(url, '_blank');
   };
-  (document.getElementById('downloadHtml2')||{}).onclick=downloadOnly;
-  (document.getElementById('saveLocal2')||{}).onclick=saveLocalCopy;
 
-  // ===== أزرار المصمّم =====
-  (document.getElementById('printBtn3')||{}).onclick=()=>iframe.contentWindow.print();
-  (document.getElementById('downloadHtml3')||{}).onclick=downloadOnly;
-  (document.getElementById('shareGeneral3')||{}).onclick=()=>shareOrDownload('مشاركة نسخة التدقيق');
+  // بريد إلكتروني (mailto)
+  els.sendEmail.onclick = ()=>{
+    const subject = `نسخة العميل – ${els.clientName.value||''} – ${els.gateName.value||''}`.trim();
+    const body = buildSummaryText();
+    const mail = `mailto:ergonomicindustrial@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mail;
+  };
 
-  // حفظ مدخلات العميل (اختياري)
-  try{
-    const savedCE = localStorage.getItem('wf_client_email'); if(savedCE) clientEmail.value=savedCE;
-    const savedWA = localStorage.getItem('wf_client_wa'); if(savedWA) clientWa.value=savedWA;
-  }catch(e){}
-  clientEmail.addEventListener('input', ()=>{ try{ localStorage.setItem('wf_client_email', clientEmail.value||''); }catch(e){} });
-  clientWa.addEventListener('input', ()=>{ try{ localStorage.setItem('wf_client_wa', clientWa.value||''); }catch(e){} });
+  // إدراج بيانات افتراضية أول مرة
+  function seedIfEmpty(){
+    if(state.rows.length) return;
+    [
+      'تزويد الآلات بحواجز أمان مناسبة',
+      'لوحات التحذير مثبتة في الأماكن الخطرة',
+      'تدريب العاملين على تشغيل الآلات بأمان',
+      'وجود خطة استجابة للطوارئ وإسعافات أولية',
+      'سجلات الصيانة محدثة أسبوعيًا'
+    ].forEach(t=> addRow(t));
+  }
 
-});
+  // تحميل
+  loadDraft();
+  seedIfEmpty();
+
+  // راقب تغييرات الحقول العامة للحفظ التلقائي
+  ['gateNo','gateName','todayInput','clientName','siteName','defaultResp'].forEach(id=>{
+    els[id].addEventListener('input', persist);
+    els[id].addEventListener('change', persist);
+  });
 </script>
 </body>
 </html>
