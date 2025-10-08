@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نسخة المصمم – اختبار الباب وإدخال بيانات العميل (إصلاح الأخطاء)</title>
+<title>دِزاينر – إعداد الباب وتوليد نسخة العميل (v2.6)</title>
 <style>
   :root{--bg:#f7f8fb;--ink:#111;--muted:#666;--line:#e5e7eb;--card:#fff;--accent:#2563eb;--head:#e6f0ff}
   *{box-sizing:border-box}
+  html, body, input, select, textarea, button, table{font-variant-numeric:lining-nums tabular-nums}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Kufi Arabic","Cairo",Tahoma,Arial,sans-serif}
   .wrap{max-width:1100px;margin:auto;padding:18px}
   .card{background:var(--card);border:1px solid #d9dde5;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
@@ -31,6 +32,9 @@
   @media print{.no-print{display:none!important}.card{border:0;box-shadow:none}body{background:#fff}}
   .tests{margin-top:10px}
   .tests pre{white-space:pre-wrap;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px}
+  .footer{margin-top:18px;font-size:12px;color:#334155;text-align:center;border-top:1px solid #d9dde5;padding-top:10px}
+  .footer a{color:#2563eb;text-decoration:none}
+  .sharebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 </style>
 </head>
 <body>
@@ -38,12 +42,13 @@
   <!-- لوحة المصمم -->
   <section id="designer" class="card">
     <div class="title">
-      <img id="lg" class="logo" alt="logo" hidden>
-      <h1>نسخة المصمم – اختبار الباب وتحضير نسخة العميل</h1>
+      <!-- شعار شركتك ثابت أعلى اليمين: ضع الملف بجانب هذا HTML بنفس الاسم -->
+      <img id="brandFixed" class="logo" alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" style="margin-inline-start:auto">
+      <h1>دِزاينر – اختبار الباب وتحضير نسخة العميل</h1>
       <span style="margin-inline-start:auto"></span>
       <button type="button" class="btn no-print" id="printSetup">🖨️ طباعة</button>
     </div>
-    <div class="muted">أدخل بيانات العميل والموقع، اختر الباب والقالب، عدّل البنود، ثم اضغط "معاينة نسخة العميل" للاختبار. يمكنك أيضًا تصدير HTML جاهز للعميل.</div>
+    <div class="muted">أدخل بيانات العميل والموقع، اختر الباب والقالب، عدّل البنود وأنواع التقييم، ثم معاينة/تصدير نسخة العميل. الأرقام إنجليزية دائمًا.</div>
     <div id="toast" class="hidden" style="margin-top:8px;padding:8px 12px;border:1px solid #c7d2fe;background:#eef2ff;border-radius:10px;color:#374151"></div>
 
     <div class="row" style="margin-top:10px">
@@ -66,7 +71,7 @@
       <div class="col-3"><label>رقم الباب<br><input id="gateNo" type="text" placeholder="1"></label></div>
       <div class="col-5"><label>اسم الباب<br><input id="gateName" type="text" placeholder="مثال: الحماية من الآلات"></label></div>
       <div class="col-4"><label>تاريخ الإصدار<br><input id="issueDate" type="date"></label></div>
-      <div class="col-6"><label class="btn no-print" style="display:inline-flex;align-items:center;gap:8px"><input type="file" id="logoInput" accept="image/*"> رفع الشعار</label></div>
+      <div class="col-6"><label class="btn no-print" style="display:inline-flex;align-items:center;gap:8px"><input type="file" id="logoInput" accept="image/*"> رفع شعار العميل</label></div>
     </div>
 
     <div class="toolbar no-print">
@@ -81,14 +86,15 @@
       <button type="button" class="btn" data-tpl="ch8">باب 8</button>
       <button type="button" class="btn" data-tpl="ergo">Ergonomic</button>
       <span style="flex:1"></span>
-      <label class="pill"><input type="checkbox" id="optChecks" checked> ✔/✖</label>
-      <label class="pill"><input type="checkbox" id="optRisk"> تقييم المخاطر (1–5)</label>
+      <label class="pill"><input type="checkbox" id="optChecks" checked> ✔/✖ (افتراضي للبنود الجديدة)</label>
+      <label class="pill"><input type="checkbox" id="optRisk"> تقييم 1–5 (افتراضي للبنود الجديدة)</label>
     </div>
 
     <div class="toolbar no-print">
       <button type="button" class="btn" id="addRow">➕ إضافة بند</button>
       <button type="button" class="btn" id="selectAll">✔️ تحديد الكل</button>
       <button type="button" class="btn" id="clearAll">❌ إلغاء التحديد</button>
+      <button type="button" class="btn" id="deleteExcluded">🗑️ حذف البنود غير المُضمّنة</button>
       <button type="button" class="btn" id="saveDraft">💾 حفظ مسودة</button>
       <button type="button" class="btn" id="reset">إعادة تعيين</button>
       <span style="flex:1"></span>
@@ -96,13 +102,17 @@
     </div>
 
     <table>
-      <thead><tr><th style="width:74px">تضمين</th><th>نص البند</th></tr></thead>
+      <thead><tr><th style="width:74px">تضمين</th><th>نص البند</th><th style="width:160px">نوع التقييم</th></tr></thead>
       <tbody id="tbody"></tbody>
     </table>
 
     <div class="toolbar no-print">
       <button type="button" class="btn primary" id="preview">👁️ معاينة نسخة العميل (اختبار)</button>
       <button type="button" class="btn" id="exportHtml">⬇️ تصدير HTML للعميل (أوفلاين)</button>
+      <button type="button" class="btn" id="makeLink">🌐 إنشاء رابط للعميل</button>
+    </div>
+    <div class="footer no-print">
+      Ergonomic Industrial — <a href="https://ergonomicindustrial.com" target="_blank">ergonomicindustrial.com</a> — Email: <a href="mailto:ergonomicindustrial@gmail.com">ergonomicindustrial@gmail.com</a> — Phone/WhatsApp: 67756743
     </div>
 
     <!-- اختبارات تلقائية -->
@@ -118,9 +128,12 @@
 
   <!-- معاينة/اختبار نسخة العميل -->
   <section id="client" class="card hidden">
-    <div class="title" style="justify-content:center">
-      <img id="lg2" class="logo" alt="logo" hidden>
-      <h1 id="titleTxt">قائمة تدقيق السلامة – الباب</h1>
+    <div class="title" style="justify-content:center; position:relative">
+      <img alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" style="height:48px;position:absolute;inset-inline-end:0;top:0">
+      <div style="flex:1;display:flex;justify-content:center;gap:8px;align-items:center">
+        <img id="lg2" class="logo" alt="logo" hidden>
+        <h1 id="titleTxt" style="margin:0">قائمة تدقيق السلامة – الباب</h1>
+      </div>
     </div>
 
     <div class="row">
@@ -134,16 +147,18 @@
     <table id="clientTable">
       <thead>
         <tr>
-          <th>م</th><th>البند</th><th id="hOk">✓</th><th id="hNo">✗</th><th id="hRisk" class="hidden">المخاطر (1–5)</th><th>ملاحظات (≤50)</th>
+          <th>م</th><th>البند</th><th>نوع</th><th colspan="2">حقل التقييم</th><th>ملاحظات (≤50)</th>
         </tr>
       </thead>
       <tbody id="clientBody"></tbody>
     </table>
 
-    <div class="toolbar no-print">
+    <div class="toolbar no-print sharebar">
       <button type="button" class="btn" id="back">↩️ رجوع للتعديل</button>
       <span style="flex:1"></span>
-      <button type="button" class="btn" id="printClient">🖨️ طباعة</button>
+      <button type="button" class="btn" id="sendWA">📤 إرسال واتساب</button>
+      <button type="button" class="btn" id="sendMail">📧 إرسال إيميل</button>
+      <button type="button" class="btn" id="printClient">🖨️ طباعة / PDF</button>
     </div>
   </section>
 </div>
@@ -153,23 +168,27 @@
   const $ = s=>document.querySelector(s);
   const S = s=>document.querySelectorAll(s);
 
+  // إعدادات الروابط (قالب فقط – الرفع يدوي)
+  const LINK_BASE = "https://alquraishi2013-gif.github.io/ergonomic-safety-audit-checklist"; // أو https://ergonomicindustrial.com/audits
+  const LINK_SUBDIR = "exports"; // يمكن "" لو بدون مجلد
+
   // العناصر
   const els = {
-    // لوحة المصمم
     designer: $('#designer'), client: $('#client'),
-    lg: $('#lg'), lg2: $('#lg2'), logoInput: $('#logoInput'),
+    lg: $('#lg2'), logoInput: $('#logoInput'),
     dClient: $('#dClient'), dSite: $('#dSite'), dDescSel: $('#dDescSel'), dDescOther: $('#dDescOther'),
     gateNo: $('#gateNo'), gateName: $('#gateName'), issueDate: $('#issueDate'),
     optChecks: $('#optChecks'), optRisk: $('#optRisk'),
-    addRow: $('#addRow'), selectAll: $('#selectAll'), clearAll: $('#clearAll'), saveDraft: $('#saveDraft'), reset: $('#reset'),
-    filter: $('#filter'),
-    tbody: $('#tbody'),
-    preview: $('#preview'), exportHtml: $('#exportHtml'), printSetup: $('#printSetup'),
-    // معاينة العميل
+    addRow: $('#addRow'), selectAll: $('#selectAll'), clearAll: $('#clearAll'), deleteExcluded: $('#deleteExcluded'), saveDraft: $('#saveDraft'), reset: $('#reset'),
+    filter: $('#filter'), tbody: $('#tbody'),
+    preview: $('#preview'), exportHtml: $('#exportHtml'), makeLink: $('#makeLink'), printSetup: $('#printSetup'),
+    // معاينة
     titleTxt: $('#titleTxt'), cClient: $('#cClient'), cSite: $('#cSite'), cDesc: $('#cDesc'), cAuditor: $('#cAuditor'), cDate: $('#cDate'),
-    clientBody: $('#clientBody'), hRisk: $('#hRisk'), back: $('#back'), printClient: $('#printClient'),
+    clientBody: $('#clientBody'), back: $('#back'), printClient: $('#printClient'),
     // اختبارات
-    btnRunTests: $('#btnRunTests'), testOut: $('#testOut')
+    btnRunTests: $('#btnRunTests'), testOut: $('#testOut'),
+    // إرسال
+    sendWA: $('#sendWA'), sendMail: $('#sendMail')
   };
 
   // تاريخ افتراضي
@@ -177,13 +196,13 @@
   els.issueDate.value = today; els.cDate.value = today;
 
   // الحالة
-  let logoData = '';
-  let rows = []; // {id,text,include}
+  let clientLogoData = '';
+  let rows = []; // {id,text,include,type}
 
-  // ثوابت التخزين
-  const LS_KEY = 'designer_console_v2';
+  // التخزين
+  const LS_KEY = 'designer_console_v2_6_types';
 
-  // قوالب الأبواب (عربي)
+  // قوالب الأبواب (كما هي)
   const templates = {
     ch1:[
       "التأكد من وجود دليل إرشادي للسلامة مكتوب بالعربية ولغة يفهمها العمال",
@@ -222,38 +241,50 @@
     ergo:["ارتفاع الطاولة مناسب","كرسي قابل للتعديل بدعم أسفل الظهر","مسافة رؤية الشاشة موصى بها","مناولة يدوية ضمن الحدود"]
   };
 
-  // أدوات عامة
-  function uid(){return Math.random().toString(36).slice(2);}
-  function escapeHtml(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
-  function toast(msg){ const t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),1500); }
+  function uid(){return Math.random().toString(36).slice(2)}
+  function escapeHtml(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])) }
+  function toast(msg){ const t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),1800) }
 
   // حفظ/استرجاع
   function persist(){
     const payload = {
-      logoData, rows,
+      clientLogoData, rows,
       dClient: els.dClient.value, dSite: els.dSite.value,
       descSel: els.dDescSel.value, descOther: els.dDescOther.value,
       gateNo: els.gateNo.value, gateName: els.gateName.value, issue: els.issueDate.value,
       opts: { checks: els.optChecks.checked, risk: els.optRisk.checked }
     };
-    try{ localStorage.setItem(LS_KEY, JSON.stringify(payload)); }catch(e){ console.warn('persist failed', e); }
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(payload)) }catch(e){ console.warn('persist failed', e) }
   }
   function restore(){
     const raw = localStorage.getItem(LS_KEY); if(!raw) return;
     try{
       const d = JSON.parse(raw);
-      logoData = d.logoData||''; if(logoData){ els.lg.src=logoData; els.lg.hidden=false; }
-      rows = Array.isArray(d.rows)? d.rows: [];
+      clientLogoData = d.clientLogoData||'';
+      rows = Array.isArray(d.rows)? d.rows.map(x=>({id:x.id,text:x.text,include:!!x.include,type:x.type||'yesno'})) : [];
       els.dClient.value = d.dClient||''; els.dSite.value=d.dSite||'';
       els.dDescSel.value = d.descSel||''; els.dDescOther.value = d.descOther||'';
-      if(els.dDescSel.value==='__other'){ els.dDescOther.classList.remove('hidden'); }
+      if(els.dDescSel.value==='__other'){ els.dDescOther.classList.remove('hidden') }
       els.gateNo.value=d.gateNo||''; els.gateName.value=d.gateName||''; els.issueDate.value=d.issue||today;
-      if(d.opts){ els.optChecks.checked=!!d.opts.checks; els.optRisk.checked=!!d.opts.risk; }
+      if(d.opts){ els.optChecks.checked=!!d.opts.checks; els.optRisk.checked=!!d.opts.risk }
       renderSetup();
-    }catch(e){ console.warn('restore failed', e); }
+    }catch(e){ console.warn('restore failed', e) }
   }
 
+  // شعار العميل (أسفل نسخة العميل)
+  els.logoInput.addEventListener('change', e=>{
+    const f=e.target.files[0]; if(!f){clientLogoData=''; persist(); return}
+    const rd=new FileReader(); rd.onload=ev=>{ clientLogoData=ev.target.result; persist(); toast('تم رفع شعار العميل (سيظهر في أسفل النسخة)') }; rd.readAsDataURL(f)
+  })
+
   // إدارة البنود
+  function defaultType(){
+    if(els.optRisk.checked && !els.optChecks.checked) return 'scale';
+    if(!els.optRisk.checked && !els.optChecks.checked) return 'note';
+    return 'yesno';
+  }
+  function addRow(text){ rows.push({id:uid(), text:(text||'* بند جديد'), include:true, type: defaultType()}); renderSetup(); persist() }
+
   function renderSetup(){
     const q = els.filter.value.trim().toLowerCase();
     els.tbody.innerHTML='';
@@ -261,167 +292,226 @@
       if(q && !String(r.text||'').toLowerCase().includes(q)) return;
       const tr=document.createElement('tr');
       tr.innerHTML=`<td style="width:74px;text-align:center"><input type="checkbox" class="pick" data-id="${r.id}" ${r.include?'checked':''}></td>
-                    <td contenteditable class="txt" data-id="${r.id}">${escapeHtml(r.text||'')}</td>`;
+                    <td contenteditable class="txt" data-id="${r.id}">${escapeHtml(r.text||'')}</td>
+                    <td style="text-align:center">
+                      <select class="typeSel" data-id="${r.id}">
+                        <option value="yesno" ${r.type==='yesno'?'selected':''}>✔/✖</option>
+                        <option value="scale" ${r.type==='scale'?'selected':''}>1–5</option>
+                        <option value="note" ${r.type==='note'?'selected':''}>ملاحظة فقط</option>
+                      </select>
+                    </td>`;
       els.tbody.appendChild(tr);
-    });
+    })
   }
-  function addRow(text){ rows.push({id:uid(), text:(text||'* بند جديد'), include:true}); renderSetup(); persist(); }
 
-  // أحداث وصف الموقع
-  els.dDescSel.addEventListener('change',()=>{
-    if(els.dDescSel.value==='__other'){
-      els.dDescOther.classList.remove('hidden');
-      els.dDescOther.focus();
-    } else {
-      els.dDescOther.classList.add('hidden');
-    }
-    persist();
-  });
-  els.dDescOther.addEventListener('input', persist);
-
-  // شعار
-  els.logoInput.addEventListener('change', e=>{
-    const f=e.target.files[0]; if(!f){logoData=''; els.lg.hidden=true; persist(); return;}
-    const rd=new FileReader(); rd.onload=ev=>{ logoData=ev.target.result; els.lg.src=logoData; els.lg.hidden=false; persist(); }; rd.readAsDataURL(f);
-  });
-
-  // أزرار البنود
+  // أحداث الجدول
   els.addRow.onclick=()=>addRow();
-  els.selectAll.onclick=()=>{ rows.forEach(r=>r.include=true); renderSetup(); persist(); };
-  els.clearAll.onclick=()=>{ rows.forEach(r=>r.include=false); renderSetup(); persist(); };
-  els.tbody.addEventListener('input', e=>{ if(e.target.classList.contains('txt')){ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.text=e.target.innerText.trim(); persist(); } } });
-  els.tbody.addEventListener('change', e=>{ if(e.target.classList.contains('pick')){ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.include=e.target.checked; persist(); } } });
-  els.filter.addEventListener('input', renderSetup);
+  els.selectAll.onclick=()=>{ rows.forEach(r=>r.include=true); renderSetup(); persist() };
+  els.clearAll.onclick=()=>{ rows.forEach(r=>r.include=false); renderSetup(); persist() };
+  els.deleteExcluded.onclick=()=>{ if(confirm('سيتم حذف جميع البنود غير المُضمّنة. متابعة؟')){ rows = rows.filter(r=>r.include); renderSetup(); persist(); toast('تم حذف البنود غير المُضمّنة') } };
+  els.tbody.addEventListener('input', e=>{ if(e.target.classList.contains('txt')){ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.text=e.target.innerText.trim(); persist() } } })
+  els.tbody.addEventListener('change', e=>{
+    if(e.target.classList.contains('pick')){ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.include=e.target.checked; persist() } }
+    if(e.target.classList.contains('typeSel')){ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.type=e.target.value; persist() } }
+  })
+  els.filter.addEventListener('input', renderSetup)
 
-  // تحميل القوالب (إصلاح السلسلة متعددة الأسطر)
+  // تحميل القوالب
   function applyTemplate(key){
     const arr = templates[key]||[]; if(!arr.length){ alert('لا توجد بنود لهذا الباب'); return; }
     const replace = confirm('استبدال القائمة الحالية بالقالب؟\nOK = استبدال\nCancel = إضافة');
-    // أزل أي فلترة حتى تظهر البنود
     els.filter.value='';
-    if(replace){ rows = []; }
-    arr.forEach(t=> rows.push({id:uid(), text:t, include:true}));
-    // اسم/رقم الباب تلقائيًا إن لم يُملأا
-    if(!els.gateName.value){
-      const nameMap={ch1:'الأحكام العامة', ch2:'المباني والمرافق', ch3:'الحماية من الآلات', ch4:'تداول ورفع وتخزين المواد', ch5:'السلامة الكهربائية', ch6:'بيئة العمل', ch7:'المواد الكيميائية', ch8:'المرافق العامة', ergo:'Ergonomic'};
-      els.gateName.value = nameMap[key]||'';
-    }
-    if(!els.gateNo.value){ const noMap={ch1:'1',ch2:'2',ch3:'3',ch4:'4',ch5:'5',ch6:'6',ch7:'7',ch8:'8'}; els.gateNo.value = noMap[key]||els.gateNo.value; }
+    if(replace){ rows = [] }
+    arr.forEach(t=> rows.push({id:uid(), text:t, include:true, type: defaultType()}));
+    if(!els.gateName.value){ const nameMap={ch1:'الأحكام العامة', ch2:'المباني والمرافق', ch3:'الحماية من الآلات', ch4:'تداول ورفع وتخزين المواد', ch5:'السلامة الكهربائية', ch6:'بيئة العمل', ch7:'المواد الكيميائية', ch8:'المرافق العامة', ergo:'Ergonomic'}; els.gateName.value = nameMap[key]||'' }
+    if(!els.gateNo.value){ const noMap={ch1:'1',ch2:'2',ch3:'3',ch4:'4',ch5:'5',ch6:'6',ch7:'7',ch8:'8'}; els.gateNo.value = noMap[key]||els.gateNo.value }
     renderSetup(); persist();
-    // مرر للجدول ليظهر للمستخدم
-    els.tbody.scrollIntoView({behavior:'smooth', block:'start'});
-    toast(`تم تحميل ${arr.length} بندًا من ${key.toUpperCase()}`);
+    document.getElementById('tbody').scrollIntoView({behavior:'smooth', block:'start'});
+    toast(`تم تحميل ${arr.length} بندًا من ${key.toUpperCase()}`)
   }
-  S('[data-tpl]').forEach(btn=>{ btn.addEventListener('click',()=> applyTemplate(btn.getAttribute('data-tpl')) ); });
+  S('[data-tpl]').forEach(btn=>{ btn.addEventListener('click',()=> applyTemplate(btn.getAttribute('data-tpl')) ) });
 
-  // حفظ/إعادة تعيين/طباعة (طباعة بدون document.write)
-  els.saveDraft.onclick=()=>{ persist(); alert('تم حفظ المسودة محليًا'); };
-  els.reset.onclick=()=>{ if(confirm('مسح كل البيانات؟')){ localStorage.removeItem(LS_KEY); rows=[]; logoData=''; els.lg.hidden=true; renderSetup(); els.dClient.value=els.dSite.value=els.gateNo.value=els.gateName.value=''; els.dDescSel.value=''; els.dDescOther.value=''; persist(); } };
-  els.printSetup.onclick=()=>{ window.print(); };
+  // تبديل حقل "أخرى" للوصف
+  els.dDescSel.addEventListener('change',()=>{
+    if(els.dDescSel.value==='__other') els.dDescOther.classList.remove('hidden');
+    else { els.dDescOther.classList.add('hidden'); els.dDescOther.value=''; }
+    persist();
+  });
+
+  // حفظ/إعادة تعيين/طباعة
+  els.saveDraft.onclick=()=>{ persist(); alert('تم حفظ المسودة محليًا') };
+  els.reset.onclick=()=>{ if(confirm('مسح كل البيانات؟')){ localStorage.removeItem(LS_KEY); rows=[]; clientLogoData=''; renderSetup(); els.dClient.value=els.dSite.value=els.gateNo.value=els.gateName.value=''; els.dDescSel.value=''; els.dDescOther.value=''; persist() } };
+  els.printSetup.onclick=()=>{ window.print() };
 
   // معاينة نسخة العميل
   els.preview.onclick=()=>{
-    // لو ما في ولا بند محدد، نحدد الكل تلقائيًا
     let list = rows.filter(r=>r.include && String(r.text||'').trim());
-    if(!list.length && rows.length){ rows.forEach(r=>r.include=true); renderSetup(); persist(); list = rows.slice(); }
-    if(!list.length){ alert('اختر بندًا واحدًا على الأقل'); return; }
+    if(!list.length && rows.length){ rows.forEach(r=>r.include=true); renderSetup(); persist(); list = rows.slice() }
+    if(!list.length){ alert('اختر بندًا واحدًا على الأقل'); return }
 
     els.titleTxt.textContent = `قائمة تدقيق السلامة – الباب ${els.gateNo.value||'-'} – ${els.gateName.value||''}`;
     els.cClient.value = els.dClient.value; els.cSite.value = els.dSite.value;
     const desc = (els.dDescSel.value==='__other'? els.dDescOther.value : els.dDescSel.value) || '';
-    els.cDesc.value = desc;
-    // أزل الفلترة حتى لا تختفي البنود
-    els.filter.value='';
-    els.clientBody.innerHTML='';
-    if(logoData){ els.lg2.src=logoData; els.lg2.hidden=false; } else { els.lg2.hidden=true; }
-
-    const includeRisk = !!els.optRisk.checked; if(includeRisk){ els.hRisk.classList.remove('hidden'); } else { els.hRisk.classList.add('hidden'); }
+    els.cDesc.value = desc; document.getElementById('clientBody').innerHTML='';
 
     list.forEach((r,i)=>{
+      const type = r.type||'yesno';
+      let typeTxt = type==='yesno'? '✔/✖' : (type==='scale'? '1–5' : 'ملاحظة');
+      let control = '';
+      if(type==='yesno'){
+        control = `<label style="margin-inline:6px"><input type="radio" name="r${i}" value="ok"> ✔</label>
+                   <label style="margin-inline:6px"><input type="radio" name="r${i}" value="no"> ✖</label>`;
+      } else if(type==='scale') {
+        control = `<select><option value=""></option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>`;
+      } else {
+        control = `<span class="muted">—</span>`;
+      }
       const tr=document.createElement('tr');
       tr.innerHTML = `<td class="num">${i+1}</td>
                       <td>${escapeHtml(r.text)}</td>
-                      ${els.optChecks.checked? `<td class="chk"><input type="checkbox" class="ok"></td><td class="chk"><input type="checkbox" class="no"></td>` : `<td class="chk">—</td><td class="chk">—</td>`}
-                      ${includeRisk? `<td style="text-align:center"><select class="riskSel"><option value=""></option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></td>` : ''}
+                      <td style="text-align:center">${typeTxt}</td>
+                      <td colspan="2" style="text-align:center">${control}</td>
                       <td><input type="text" maxlength="50" placeholder="حتى 50 حرفًا"></td>`;
-      els.clientBody.appendChild(tr);
-    });
+      els.clientBody.appendChild(tr)
+    })
 
-    // تنافي ✓/✗
-    els.clientBody.querySelectorAll('tr').forEach(tr=>{
-      const ok=tr.querySelector('.ok'), no=tr.querySelector('.no');
-      if(ok && no){ ok.addEventListener('change',()=>{ if(ok.checked) no.checked=false; }); no.addEventListener('change',()=>{ if(no.checked) ok.checked=false; }); }
-    });
+    // شعار العميل في المعاينة
+    if(clientLogoData){ els.lg.src=clientLogoData; els.lg.hidden=false } else { els.lg.hidden=true }
 
-    els.designer.classList.add('hidden'); els.client.classList.remove('hidden');
-  };
+    els.designer.classList.add('hidden'); els.client.classList.remove('hidden')
+  }
 
-  // توليد HTML لنسخة العميل (ليُستخدم في التصدير والاختبارات)
-  function buildClientHTML(list, includeChecks, includeRisk, meta){
-    const rowsHtml = list.map((txt,i)=>{
-      const cells = [ `<td style="text-align:center">${i+1}</td>`, `<td>${escapeHtml(txt)}</td>` ];
-      if(includeChecks){ cells.push('<td style="text-align:center">☐</td>','<td style="text-align:center">☐</td>'); }
-      if(includeRisk){ cells.push('<td style="text-align:center">&nbsp;</td>'); }
-      cells.push('<td></td>');
-      return `<tr>${cells.join('')}</tr>`;
+  // مولّد HTML النهائي حسب الأنواع + شعار/فوتر
+  function buildClientHTMLByTypes(list, meta){
+    const rowsHtml = list.map((r,i)=>{
+      const type = r.type||'yesno';
+      let typeTxt = type==='yesno'? '✔/✖' : (type==='scale'? '1–5' : 'ملاحظة');
+      let control = '';
+      if(type==='yesno'){
+        control = '<td style="text-align:center">☐ ✔</td><td style="text-align:center">☐ ✖</td>';
+      } else if(type==='scale'){
+        control = '<td colspan="2" style="text-align:center">1 2 3 4 5</td>';
+      } else {
+        control = '<td colspan="2" style="text-align:center">—</td>';
+      }
+      return `<tr><td style="text-align:center">${i+1}</td><td>${escapeHtml(r.text)}</td><td style="text-align:center">${typeTxt}</td>${control}<td></td></tr>`;
     }).join('');
-    const checksHdr = includeChecks? '<th>✓</th><th>✗</th>' : '';
-    const riskHdr   = includeRisk? '<th>المخاطر (1–5)</th>' : '';
-    const logoHTML  = logoData? `<div style="text-align:center;margin-bottom:8px"><img src="${logoData}" style="height:60px;object-fit:contain"></div>`:'';
+
+    const clientLogo = clientLogoData? `<div style="text-align:center;margin-top:14px"><img src="${clientLogoData}" style="height:56px;object-fit:contain"></div>`:'';
+    const brandTop = `<div style="text-align:end"><img alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" style="height:50px"></div>`;
+    const footer = `<div style="margin-top:14px;padding:10px 12px;border-top:1px solid #e5e7eb;color:#334155;font-size:12px;text-align:center">
+      <div>Ergonomic Industrial — <a href="https://ergonomicindustrial.com" target="_blank">ergonomicindustrial.com</a></div>
+      <div>Email: <a href="mailto:ergonomicindustrial@gmail.com">ergonomicindustrial@gmail.com</a> | Phone/WhatsApp: 67756743</div>
+      ${clientLogo}
+    </div>`;
+
     return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>نسخة العميل</title>
-<style>body{font-family:Tahoma,Arial;margin:0;background:#f7f8fb;color:#111} .wrap{max-width:900px;margin:auto;padding:16px} .card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px} h2{text-align:center;margin:.2rem 0 .6rem} table{width:100%;border-collapse:collapse;margin-top:10px} th,td{border:1px solid #ccc;padding:8px;vertical-align:middle} th{background:#e6f0ff;text-align:center}</style></head>
-<body><div class="wrap"><div class="card">${logoHTML}
+<style>body{font-family:Tahoma,Arial;margin:0;background:#f7f8fb;color:#111;font-variant-numeric:lining-nums tabular-nums} .wrap{max-width:900px;margin:auto;padding:16px} .card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px} h2{text-align:center;margin:.2rem 0 .6rem} table{width:100%;border-collapse:collapse;margin-top:10px} th,td{border:1px solid #ccc;padding:8px;vertical-align:middle} th{background:#e6f0ff;text-align:center} a{color:#2563eb}</style></head>
+<body><div class="wrap"><div class="card">${brandTop}
 <h2>قائمة تدقيق السلامة – الباب ${escapeHtml(meta.gateNo||'-')} – ${escapeHtml(meta.gateName||'')}</h2>
 <div style="margin:6px 0 10px;color:#333">الشركة: ${escapeHtml(meta.client||'-')} | الموقع: ${escapeHtml(meta.site||'-')} | الوصف: ${escapeHtml(meta.desc||'-')} | الإصدار: ${escapeHtml(meta.issue||'-')}</div>
-<table><thead><tr><th>م</th><th>البند</th>${checksHdr}${riskHdr}<th>ملاحظات</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+<table><thead><tr><th>م</th><th>البند</th><th>نوع</th><th colspan="2">حقل التقييم</th><th>ملاحظات</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+${footer}
 </div></div></body></html>`;
   }
 
-  // تصدير HTML للعميل (أوفلاين) — بدون document.write
+  // تصدير HTML للعميل (أوفلاين)
   els.exportHtml.onclick=()=>{
-    const list = rows.filter(r=>r.include && String(r.text||'').trim()).map(r=>r.text.trim());
-    if(!list.length){ alert('اختر بندًا واحدًا على الأقل'); return; }
-    const includeRisk = !!els.optRisk.checked; const includeChecks = !!els.optChecks.checked;
+    const list = rows.filter(r=>r.include && String(r.text||'').trim());
+    if(!list.length){ alert('اختر بندًا واحدًا على الأقل'); return }
     const desc = (els.dDescSel.value==='__other'? els.dDescOther.value : els.dDescSel.value) || '';
-    const html = buildClientHTML(list, includeChecks, includeRisk, {
-      gateNo: els.gateNo.value, gateName: els.gateName.value, client: els.dClient.value, site: els.dSite.value, desc, issue: els.issueDate.value
-    });
-    const blob=new Blob([html],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='نسخة-العميل.html'; a.click(); URL.revokeObjectURL(url);
-  };
+    const meta = { gateNo: els.gateNo.value, gateName: els.gateName.value, client: els.dClient.value, site: els.dSite.value, desc, issue: els.issueDate.value };
+    const html = buildClientHTMLByTypes(list, meta);
+    const fname = suggestFileName()+'.html';
+    const blob=new Blob([html],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=fname; a.click(); URL.revokeObjectURL(url);
+  }
 
-  // العودة من المعاينة
-  els.back.onclick=()=>{ els.client.classList.add('hidden'); els.designer.classList.remove('hidden'); };
-  els.printClient.onclick=()=>window.print();
+  function suggestFileName(){
+    const sanitize = s=>String(s||'').trim().replace(/\s+/g,'-').replace(/[^\w\-]/g,'');
+    const parts=[ sanitize(els.dClient.value||'Client'), sanitize(els.dSite.value||'Site'), 'G'+sanitize(els.gateNo.value||'0'), (els.issueDate.value||today) ];
+    return parts.filter(Boolean).join('_');
+  }
 
-  // تزامن قيم عامة
-  ['input','change'].forEach(ev=>{
-    ['dClient','dSite','gateNo','gateName','issueDate','optChecks','optRisk'].forEach(id=>{ els[id].addEventListener(ev, persist); });
-  });
+  // إنشاء رابط للعميل (قالب)
+  els.makeLink.onclick=()=>{
+    const fname = prompt('اسم الملف (بدون مسافات وبدون امتداد .html):', suggestFileName()) || suggestFileName();
+    const base = LINK_BASE.replace(/\/$/,'');
+    const sub = LINK_SUBDIR? '/'+LINK_SUBDIR.replace(/^\//,'') : '';
+    const url = `${base}${sub}/${fname}.html`;
+    navigator.clipboard && navigator.clipboard.writeText(url).catch(()=>{});
+    toast('تم إنشاء الرابط (نُسخ للحافظة). تذكير: ارفع الملف يدويًا لنفس المسار ليعمل الرابط.')
+    alert('رابط العميل:\n'+url+'\n\n* تذكير: ارفع ملف HTML إلى نفس المسار على GitHub Pages أو موقعك.')
+  }
 
-  // اختبارات بسيطة (لا نعدّل الموجودة؛ نضيف فقط)
-  els.btnRunTests.addEventListener('click',()=>{
+  // العودة والطباعة
+  els.back.onclick=()=>{ els.client.classList.add('hidden'); els.designer.classList.remove('hidden') }
+  els.printClient.onclick=()=>window.print()
+
+  // إرسال واتساب/إيميل (مشاركة)
+  function buildShareText(){
+    const title = els.titleTxt.textContent || 'قائمة تدقيق السلامة';
+    const company = els.cClient.value||els.dClient.value||'-';
+    const site = els.cSite.value||els.dSite.value||'-';
+    const g = (els.gateNo.value||'-')+ ' – ' + (els.gateName.value||'');
+    const date = els.cDate.value || els.issueDate.value || '';
+    const fname = suggestFileName()+'.html';
+    const base = LINK_BASE.replace(/\/$/,'');
+    const sub = LINK_SUBDIR? '/'+LINK_SUBDIR.replace(/^\//,'') : '';
+    const maybeURL = `${base}${sub}/${fname}`;
+    const body = `العنوان: ${title}\nالشركة: ${company}\nالموقع: ${site}\nالباب: ${g}\nالتاريخ: ${date}\n\n📎 اسم الملف المقترح: ${fname}\n🔗 رابط (إن تم رفع الملف): ${maybeURL}`;
+    return {subject: `${company} | ${g} | ${date}`, body}
+  }
+  els.sendWA.onclick=()=>{
+    const {body}=buildShareText();
+    const url = 'https://wa.me/?text='+encodeURIComponent(body);
+    window.open(url,'_blank')
+  }
+  els.sendMail.onclick=()=>{
+    const {subject, body}=buildShareText();
+    const href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`${body}\n\n* الرجاء إرفاق ملف HTML المصدَّر في الرسالة.`)}`;
+    window.location.href = href;
+  }
+
+  // تزامن عام
+  ;['input','change'].forEach(ev=>{ ['dClient','dSite','gateNo','gateName','issueDate','optChecks','optRisk','dDescSel','dDescOther'].forEach(id=>{ const el=els[id]; if(el) el.addEventListener(ev, persist) }) })
+
+  // اختبارات – إضافة دون حذف القديم
+  els.btnRunTests && els.btnRunTests.addEventListener('click',()=>{
     const logs=[]; const ok=(name,cond)=>logs.push((cond?'✅ ':'❌ ')+name+(cond?'':' (فشل)'));
 
-    // اختبار 1: تحميل قالب باب 1 يضيف بنود
     const before=rows.length; applyTemplate('ch1'); const after=rows.length; ok('تحميل قالب باب 1 يضيف عناصر', after>before);
 
-    // اختبار 2: المعاينة تُظهر الصفحة ويملأ العناوين
-    els.preview.click();
-    ok('تبديل إلى وضع العميل', !els.client.classList.contains('hidden'));
+    els.preview.click(); ok('تبديل إلى وضع العميل', !els.client.classList.contains('hidden'));
     ok('العنوان يحتوي رقم/اسم الباب', /قائمة تدقيق السلامة/.test(els.titleTxt.textContent));
 
-    // اختبار 3: تصدير HTML ينتج نصًا صالحًا
-    const list = rows.filter(r=>r.include && String(r.text||'').trim()).map(r=>r.text.trim());
-    const html = buildClientHTML(list, true, true, {gateNo:'1',gateName:'اختبار',client:'X',site:'Y',desc:'مكتب',issue:'2025-01-01'});
-    ok('buildClientHTML يحتوي <!doctype html>', /^<!doctype html>/i.test(html));
+    const htmlNew = buildClientHTMLByTypes([{text:'بند yes/no',type:'yesno'},{text:'بند scale',type:'scale'},{text:'بند note',type:'note'}], {gateNo:'2',gateName:'اختبار2',client:'C',site:'S',desc:'D',issue:'2025-01-02'});
+    ok('buildClientHTMLByTypes يحتوي <!doctype html>', /^<!doctype html>/i.test(htmlNew));
+    ok('الفوتر يحتوي بيانات التواصل الصحيحة', /ergonomicindustrial\.com/.test(htmlNew) && /ergonomicindustrial@gmail\.com/.test(htmlNew) && /67756743/.test(htmlNew));
 
-    els.testOut.textContent = logs.join('\n');
-  });
+    ok('عدد #lg2 واحد فقط', document.querySelectorAll('#lg2').length===1);
+    ok('عدد #titleTxt واحد فقط', document.querySelectorAll('#titleTxt').length===1);
 
-  // بدء
-  function seed(){ if(rows.length) return; ['التأكد من وجود دليل إرشادي للسلامة','تحديد مخاطر العمل','توفير معدات الوقاية الشخصية','فحص معدات الإطفاء وصلاحيتها'].forEach(t=>addRow(t)); }
+    const {subject, body}= (function(){
+      const title = els.titleTxt.textContent || 'قائمة تدقيق السلامة';
+      const company = els.cClient.value||els.dClient.value||'-';
+      const site = els.cSite.value||els.dSite.value||'-';
+      const g = (els.gateNo.value||'-')+ ' – ' + (els.gateName.value||'');
+      const date = els.cDate.value || els.issueDate.value || '';
+      return {subject: `${company} | ${g} | ${date}`, body: `العنوان: ${title}\nالشركة: ${company}\nالموقع: ${site}\nالباب: ${g}\nالتاريخ: ${date}`}
+    })();
+    const href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`${body}\n\n* الرجاء إرفاق ملف HTML المصدَّر في الرسالة.`)}`;
+    ok('mailto يبدأ بصيغة صحيحة', /^mailto:\?subject=/.test(href));
+    ok('لا يحتوي href على محارف \\n الخام', !/\n/.test(href));
+
+    const htmlScale = buildClientHTMLByTypes([{text:'تقييم مقياس',type:'scale'}], {gateNo:'3',gateName:'اختبار3',client:'A',site:'B',desc:'C',issue:'2025-01-03'});
+    ok('عمود المقياس يظهر كسلسلة 1 2 3 4 5', /1\s2\s3\s4\s5/.test(htmlScale));
+
+    document.getElementById('testOut').textContent = logs.join('\n');
+  })
+
+  function seed(){ if(rows.length) return; ['التأكد من وجود دليل إرشادي للسلامة','تحديد مخاطر العمل','توفير معدات الوقاية الشخصية','فحص معدات الإطفاء وصلاحيتها'].forEach(t=>addRow(t)) }
   restore(); seed();
-})();
+})()
 </script>
 </body>
 </html>
