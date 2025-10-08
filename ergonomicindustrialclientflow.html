@@ -1,465 +1,234 @@
-# Create two ready-to-use HTML files:
-# 1) Standalone (works locally in any browser) with full features.
-# 2) Static client-only fallback (no JavaScript build; fill & print/send).
-
-from pathlib import Path
-
-standalone_html = """<!doctype html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نسخة العميل – إصدار مستقل (كامل المزايا)</title>
+<title>نسخة العميل – مطابقة للاتفاق (✓ / ✗ + ملاحظات ≤50)</title>
 <style>
-  :root{--bg:#f7f8fb;--ink:#111;--muted:#666;--line:#e5e7eb;--card:#fff;--accent:#2563eb}
+  :root{--bg:#f7f8fb;--ink:#111;--muted:#666;--line:#e5e7eb;--card:#fff;--accent:#2563eb;--head:#e6f0ff}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Kufi Arabic","Cairo",Tahoma,Arial,sans-serif}
-  .wrap{max-width:1100px;margin:auto;padding:16px}
-  .card{background:var(--card);border:1px solid #ddd;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-  .row{display:grid;gap:12px}
-  @media(min-width:768px){.row{grid-template-columns:repeat(12,1fr)}.col-3{grid-column:span 3}.col-4{grid-column:span 4}.col-6{grid-column:span 6}.col-8{grid-column:span 8}.col-12{grid-column:span 12}}
-  h1{margin:.3rem 0 1rem;font-size:22px}
-  h2{margin:1rem 0 .5rem;font-size:18px}
-  label{font-size:14px;color:#333}
-  input[type="text"], input[type="date"], select, textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
-  textarea{min-height:72px}
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{border:1px solid #e5e7eb;padding:8px;vertical-align:top}
-  th{background:#eef2ff}
-  .muted{color:var(--muted);font-size:13px}
-  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-  .btn{padding:10px 14px;border-radius:12px;border:1px solid #cfd8ff;background:#fff;cursor:pointer}
-  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .btn.ghost{background:#fff;border:1px solid #ddd}
-  .btn.warn{background:#fee2e2;border-color:#fecaca}
-  .center{display:flex;align-items:center;gap:10px}
-  .pill{display:inline-flex;gap:6px;align-items:center;padding:4px 10px;border:1px solid #ddd;border-radius:999px;background:#fff;font-size:12px}
+  .wrap{max-width:980px;margin:auto;padding:18px}
+  .sheet{background:var(--card);border:1px solid #d9dde5;border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  .title{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
   .logo{height:64px;object-fit:contain}
-  .hidden{display:none !important}
-  .hr{height:1px;background:var(--line);margin:10px 0}
-  .notice{background:#fef9c3;border:1px solid #fde68a;color:#854d0e;padding:10px;border-radius:10px;font-size:13px}
-  .badge{background:#e5edff;color:#1e3a8a;border-radius:999px;padding:2px 8px;font-size:12px}
-  @media print{.no-print{display:none !important} body{background:#fff} .card{border:0;box-shadow:none} a[href]:after{content:"" !important}}
+  h1{margin:.2rem 0 .6rem;font-size:22px}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:420px;margin-inline-start:auto}
+  .meta label{display:flex;gap:6px;align-items:center;font-size:14px;color:#333}
+  .meta input{flex:1;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{border:1px solid #cfd7e3;padding:8px;vertical-align:middle}
+  th{background:var(--head);text-align:center}
+  td.num{width:48px;text-align:center}
+  td.chk{text-align:center;width:46px}
+  td.note input{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .btn{padding:10px 14px;border-radius:10px;border:1px solid #d0d7ff;background:#fff;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .muted{color:var(--muted);font-size:13px}
+  .box{border:1px dashed #cfd7e3;border-radius:10px;padding:10px;margin:8px 0}
+  .hidden{display:none!important}
+  @media print{.no-print{display:none!important}.sheet{border:0;box-shadow:none}body{background:#fff}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="card" id="admin">
-    <div class="row">
-      <div class="col-12 center" style="justify-content:space-between;gap:16px;flex-wrap:wrap">
-        <div class="center" style="gap:12px">
-          <img id="logo" class="logo" alt="logo" hidden>
-          <div>
-            <h1>🧾 لوحة إعداد <span class="badge">نسخة العميل</span></h1>
-            <div class="muted">أدخل البيانات، اختر البنود، ثم اضغط “إنشاء نسخة العميل”. يعمل على المتصفح والهاتف والتابلت (Android / iOS) بدون إنترنت.</div>
-          </div>
-        </div>
-        <label class="pill no-print"><input type="file" id="logoInput" accept="image/*"> شعار الشركة</label>
-      </div>
+  <!-- لوحة الإعداد (المصمم) -->
+  <div id="setup" class="sheet">
+    <div class="title">
+      <img id="lg" class="logo" alt="logo" hidden>
+      <h1>🧾 إعداد البنود – نسخة العميل</h1>
+    </div>
+    <div class="box">
+      <div class="muted">**الورك فلو المتفق عليه**: مني كمصمم ➜ العميل ➜ المدقق ➜ العميل ➜ أرجع لي. نسخة العميل ستحتوي فقط البنود التي أحددها هنا.</div>
     </div>
 
-    <div class="row">
-      <div class="col-3"><label>رقم الباب<br><input id="gateNo" type="text" placeholder="مثل: 3"></label></div>
-      <div class="col-6"><label>اسم الباب<br><input id="gateName" type="text" placeholder="الحماية من الآلات"></label></div>
-      <div class="col-3"><label>تاريخ اليوم<br><input id="todayInput" type="date"></label></div>
+    <div class="toolbar">
+      <label class="btn no-print"><input type="file" id="logoInput" accept="image/*"> رفع الشعار</label>
+      <button class="btn" id="addRow">➕ إضافة بند</button>
+      <button class="btn" id="selectAll">✔️ تحديد الكل</button>
+      <button class="btn" id="clearAll">❌ إلغاء التحديد</button>
+      <button class="btn" id="save">💾 حفظ مسودة</button>
+      <button class="btn" id="reset">إعادة تعيين</button>
+      <span class="muted">يمكنك تعديل نص البند مباشرة في الجدول</span>
     </div>
 
-    <div class="row" style="margin-top:8px">
-      <div class="col-6"><label>اسم العميل<br><input id="clientName" type="text" placeholder="اسم العميل"></label></div>
-      <div class="col-6"><label>اسم الموقع<br><input id="siteName" type="text" placeholder="موقع العمل"></label></div>
-    </div>
-
-    <div class="toolbar no-print">
-      <button class="btn ghost" id="addRow">➕ إضافة بند</button>
-      <button class="btn ghost" id="selectAll">✔️ تحديد الكل</button>
-      <button class="btn ghost" id="clearAll">❌ إلغاء التحديد</button>
-      <span class="pill">نوع الاستجابة الافتراضي:
-        <select id="defaultResp">
-          <option value="yn">صح/خطأ</option>
-          <option value="rate">تقييم 1–5</option>
-        </select>
-      </span>
-      <span class="pill">بحث: <input id="filter" type="text" placeholder="فلتر البنود" style="border:0"></span>
-      <button class="btn" id="saveDraft">💾 حفظ كمسودة (محلي)</button>
-      <button class="btn warn" id="reset">إعادة التعيين</button>
-    </div>
-
-    <div class="notice no-print">ملاحظة: "ملاحظة العميل" في النسخة النهائية محددة بـ 50 حرفًا تلقائيًا.</div>
-
-    <table id="adminTable">
+    <table>
       <thead>
         <tr>
-          <th style="width:80px">تضمين</th>
-          <th>نص البند (قابل للتعديل)</th>
-          <th style="width:160px">نوع الاستجابة</th>
-          <th style="width:60px">حذف</th>
+          <th style="width:74px">تضمين</th>
+          <th>نص البند</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
 
-    <div class="toolbar no-print">
-      <button class="btn primary" id="makeClient">🚀 إنشاء نسخة العميل</button>
-      <button class="btn" id="exportHTML">⬇️ تصدير نسخة HTML</button>
-      <span class="muted">سيتم تضمين فقط الصفوف المحددة.</span>
+    <div class="toolbar">
+      <label>رقم الباب <input id="gateNo" type="text" placeholder="1"></label>
+      <label>اسم الباب <input id="gateName" type="text" placeholder="الأحكام العامة"></label>
+      <label>تاريخ الإصدار <input id="issueDate" type="date"></label>
+      <button class="btn primary" id="build">🚀 إنشاء نسخة العميل</button>
+      <button class="btn" id="exportHtml">⬇️ تصدير HTML للعميل</button>
     </div>
   </div>
 
-  <div class="card hidden" id="client">
-    <div class="center" style="justify-content:space-between;gap:16px;flex-wrap:wrap">
-      <div class="center" style="gap:12px">
-        <img id="logoClient" class="logo" alt="logo" hidden>
-        <div>
-          <h1>✅ نسخة العميل – قائمة التدقيق</h1>
-          <div class="muted" id="meta"></div>
-        </div>
-      </div>
-      <span class="pill">التاريخ: <span id="clientDate"></span></span>
+  <!-- نسخة العميل النهائية (✓ / ✗ + ملاحظة ≤ 50) -->
+  <div id="client" class="sheet hidden">
+    <div class="title">
+      <img id="lg2" class="logo" alt="logo" hidden>
+      <h1 id="titleTxt">قائمة تدقيق السلامة – الباب</h1>
     </div>
 
-    <div class="hr"></div>
-
-    <div class="row">
-      <div class="col-6"><label>اسم المدقق<br><input id="auditorName" type="text" placeholder="اسم المدقق"></label></div>
-      <div class="col-6"><label>تاريخ التفتيش<br><input id="inspectDate" type="date"></label></div>
+    <div class="meta">
+      <label>اسم العميل: <input id="cClient" type="text" placeholder="اسم العميل"></label>
+      <label>اسم الموقع: <input id="cSite" type="text" placeholder="الموقع"></label>
+      <label>المدقق: <input id="cAuditor" type="text" placeholder="اسم المدقق"></label>
+      <label>التاريخ: <input id="cDate" type="date"></label>
     </div>
 
-    <h2> البنود المطلوب التحقق منها</h2>
-    <form id="clientForm"></form>
+    <table id="clientTable">
+      <thead>
+        <tr>
+          <th>م</th>
+          <th>البند</th>
+          <th>✓</th>
+          <th>✗</th>
+          <th>ملاحظات</th>
+        </tr>
+      </thead>
+      <tbody id="clientBody"></tbody>
+    </table>
 
     <div class="toolbar no-print">
       <button class="btn primary" id="printBtn">🖨️ طباعة</button>
-      <button class="btn" id="sendWA">📲 إرسال عبر واتساب</button>
-      <button class="btn" id="sendEmail">✉️ إرسال عبر البريد</button>
-      <button class="btn ghost" id="backToAdmin">↩️ تعديل الإعدادات</button>
+      <button class="btn" id="waBtn">📲 إرسال واتساب</button>
+      <button class="btn" id="mailBtn">✉️ إرسال بريد</button>
+      <button class="btn" id="back">↩️ رجوع للتعديل</button>
     </div>
   </div>
 </div>
 
 <script>
+(function(){
+  const $ = s=>document.querySelector(s);
   const els = {
-    logo: document.getElementById('logo'),
-    logoClient: document.getElementById('logoClient'),
-    logoInput: document.getElementById('logoInput'),
-    gateNo: document.getElementById('gateNo'),
-    gateName: document.getElementById('gateName'),
-    todayInput: document.getElementById('todayInput'),
-    clientName: document.getElementById('clientName'),
-    siteName: document.getElementById('siteName'),
-    defaultResp: document.getElementById('defaultResp'),
-    tbody: document.getElementById('tbody'),
-    addRow: document.getElementById('addRow'),
-    selectAll: document.getElementById('selectAll'),
-    clearAll: document.getElementById('clearAll'),
-    filter: document.getElementById('filter'),
-    saveDraft: document.getElementById('saveDraft'),
-    reset: document.getElementById('reset'),
-    makeClient: document.getElementById('makeClient'),
-    exportHTML: document.getElementById('exportHTML'),
-    admin: document.getElementById('admin'),
-    client: document.getElementById('client'),
-    clientForm: document.getElementById('clientForm'),
-    meta: document.getElementById('meta'),
-    clientDate: document.getElementById('clientDate'),
-    auditorName: document.getElementById('auditorName'),
-    inspectDate: document.getElementById('inspectDate'),
-    printBtn: document.getElementById('printBtn'),
-    sendWA: document.getElementById('sendWA'),
-    sendEmail: document.getElementById('sendEmail'),
-    backToAdmin: document.getElementById('backToAdmin')
+    setup: $('#setup'), client: $('#client'),
+    lg: $('#lg'), lg2: $('#lg2'), logoInput: $('#logoInput'),
+    tbody: $('#tbody'), addRow: $('#addRow'), selectAll: $('#selectAll'), clearAll: $('#clearAll'),
+    save: $('#save'), reset: $('#reset'), gateNo: $('#gateNo'), gateName: $('#gateName'), issueDate: $('#issueDate'),
+    build: $('#build'), exportHtml: $('#exportHtml'),
+    titleTxt: $('#titleTxt'), cClient: $('#cClient'), cSite: $('#cSite'), cAuditor: $('#cAuditor'), cDate: $('#cDate'),
+    clientBody: $('#clientBody'), printBtn: $('#printBtn'), waBtn: $('#waBtn'), mailBtn: $('#mailBtn'), back: $('#back')
   };
+  const today = new Date().toISOString().slice(0,10);
+  els.issueDate.value = today; els.cDate.value = today;
 
-  const state = {
-    logoDataURL: '',
-    rows: [],
-  };
-
-  const todayISO = new Date().toISOString().slice(0,10);
-  els.todayInput.value = todayISO;
+  let logoData = '';
+  let rows = []; // {id,text,include}
 
   function uid(){return Math.random().toString(36).slice(2)}
-
-  function persist(){
-    const draft = {
-      logo: state.logoDataURL,
-      gateNo: els.gateNo.value,
-      gateName: els.gateName.value,
-      date: els.todayInput.value,
-      clientName: els.clientName.value,
-      siteName: els.siteName.value,
-      defaultResp: els.defaultResp.value,
-      rows: state.rows
-    };
-    localStorage.setItem('client_version_draft', JSON.stringify(draft));
+  function persist(){ localStorage.setItem('agreed_client_rows', JSON.stringify({logoData, rows, gateNo:els.gateNo.value, gateName:els.gateName.value, issueDate:els.issueDate.value})); }
+  function load(){
+    const s = localStorage.getItem('agreed_client_rows'); if(!s) return;
+    try{ const d = JSON.parse(s); logoData=d.logoData||''; rows=Array.isArray(d.rows)?d.rows:[]; if(logoData){els.lg.src=logoData;els.lg.hidden=false}
+      els.gateNo.value=d.gateNo||''; els.gateName.value=d.gateName||''; els.issueDate.value=d.issueDate||today; renderSetup(); }catch(e){}
   }
 
-  function loadDraft(){
-    const s = localStorage.getItem('client_version_draft');
-    if(!s) return;
-    try{
-      const d = JSON.parse(s);
-      state.logoDataURL = d.logo||'';
-      if(state.logoDataURL){ els.logo.src = state.logoDataURL; els.logo.hidden=false; }
-      els.gateNo.value = d.gateNo||'';
-      els.gateName.value = d.gateName||'';
-      els.todayInput.value = d.date||todayISO;
-      els.clientName.value = d.clientName||'';
-      els.siteName.value = d.siteName||'';
-      els.defaultResp.value = d.defaultResp||'yn';
-      state.rows = Array.isArray(d.rows)? d.rows:[];
-      renderTable();
-    }catch(e){console.warn('draft parse', e)}
+  function renderSetup(){
+    els.tbody.innerHTML='';
+    rows.forEach(r=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td style="width:74px;text-align:center"><input type="checkbox" class="pick" data-id="${r.id}" ${r.include?'checked':''}></td>
+                    <td contenteditable class="txt" data-id="${r.id}">${r.text}</td>`;
+      els.tbody.appendChild(tr);
+    });
   }
 
-  function renderTable(){
-    const q = els.filter.value.trim();
-    els.tbody.innerHTML = '';
-    state.rows
-      .filter(r=>!q || r.text.includes(q))
-      .forEach(r=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="text-align:center"><input type="checkbox" class="inc" ${r.include? 'checked':''} data-id="${r.id}"></td>
-          <td contenteditable="true" class="txt" data-id="${r.id}">${r.text}</td>
-          <td>
-            <select class="kind" data-id="${r.id}">
-              <option value="yn" ${r.kind==='yn'?'selected':''}>صح/خطأ</option>
-              <option value="rate" ${r.kind==='rate'?'selected':''}>تقييم 1–5</option>
-            </select>
-          </td>
-          <td style="text-align:center"><button class="btn warn del no-print" data-id="${r.id}">حذف</button></td>`;
-        els.tbody.appendChild(tr);
-      });
-  }
+  function addRow(text){ rows.push({id:uid(), text:text||'* بند جديد', include:true}); renderSetup(); persist(); }
 
-  function addRow(text){
-    state.rows.unshift({id:uid(), include:true, text:text||'* بند جديد', kind: els.defaultResp.value});
-    renderTable();
-    persist();
-  }
+  els.addRow.onclick=()=>addRow();
+  els.selectAll.onclick=()=>{ rows.forEach(r=>r.include=true); renderSetup(); persist(); };
+  els.clearAll.onclick=()=>{ rows.forEach(r=>r.include=false); renderSetup(); persist(); };
+  els.tbody.addEventListener('input', e=>{ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(!r) return; r.text=e.target.innerText.trim(); persist(); });
+  els.tbody.addEventListener('change', e=>{ if(e.target.classList.contains('pick')){ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.include=e.target.checked; persist(); } }});
 
   els.logoInput.addEventListener('change', e=>{
-    const file = e.target.files[0];
-    if(!file){ state.logoDataURL=''; els.logo.hidden=true; return; }
-    const r = new FileReader();
-    r.onload = ev=>{ state.logoDataURL = ev.target.result; els.logo.src = state.logoDataURL; els.logo.hidden=false; persist(); };
-    r.readAsDataURL(file);
+    const f=e.target.files[0]; if(!f){logoData=''; els.lg.hidden=true; return;}
+    const rd=new FileReader(); rd.onload=ev=>{logoData=ev.target.result; els.lg.src=logoData; els.lg.hidden=false; persist();}; rd.readAsDataURL(f);
   });
 
-  els.addRow.onclick = ()=> addRow();
-  els.selectAll.onclick = ()=>{ state.rows.forEach(r=>r.include=true); renderTable(); persist(); };
-  els.clearAll.onclick = ()=>{ state.rows.forEach(r=>r.include=false); renderTable(); persist(); };
+  els.save.onclick=()=>{persist(); alert('تم حفظ المسودة محليًا');};
+  els.reset.onclick=()=>{ if(confirm('مسح كل البيانات؟')){ localStorage.removeItem('agreed_client_rows'); rows=[]; logoData=''; els.lg.hidden=true; renderSetup(); } };
 
-  els.tbody.addEventListener('input', e=>{
-    const id = e.target.getAttribute('data-id');
-    const row = state.rows.find(r=>r.id===id);
-    if(!row) return;
-    if(e.target.classList.contains('txt')) row.text = e.target.innerText.trim();
-    if(e.target.classList.contains('kind')) row.kind = e.target.value;
-    persist();
-  });
-  els.tbody.addEventListener('change', e=>{
-    const id = e.target.getAttribute('data-id');
-    const row = state.rows.find(r=>r.id===id);
-    if(!row) return;
-    if(e.target.classList.contains('inc')) row.include = e.target.checked;
-    persist();
-  });
-  els.tbody.addEventListener('click', e=>{
-    if(e.target.classList.contains('del')){
-      const id = e.target.getAttribute('data-id');
-      state.rows = state.rows.filter(r=>r.id!==id); renderTable(); persist();
-    }
-  });
+  // إنشاء نسخة العميل
+  els.build.onclick=()=>{
+    const list = rows.filter(r=>r.include && r.text.trim());
+    if(!list.length) return alert('اختر بندًا واحدًا على الأقل');
+    els.titleTxt.textContent = `قائمة تدقيق السلامة – الباب ${els.gateNo.value||'-'} – ${els.gateName.value||''}`;
+    els.clientBody.innerHTML='';
+    if(logoData){els.lg2.src=logoData; els.lg2.hidden=false}else{els.lg2.hidden=true}
 
-  els.filter.addEventListener('input', renderTable);
-
-  els.saveDraft.onclick = ()=>{ persist(); alert('تم الحفظ محليًا.'); };
-  els.reset.onclick = ()=>{
-    if(!confirm('إعادة التعيين ستفرّغ كل البيانات المخزنة محليًا. هل أنت متأكد؟')) return;
-    localStorage.removeItem('client_version_draft');
-    state.rows = []; els.logo.hidden=true; state.logoDataURL='';
-    els.gateNo.value=els.gateName.value=els.clientName.value=els.siteName.value='';
-    els.defaultResp.value='yn'; els.todayInput.value=todayISO; renderTable();
-  };
-
-  els.makeClient.onclick = ()=>{
-    const selected = state.rows.filter(r=>r.include && r.text.trim());
-    if(selected.length===0){ alert('اختر بندًا واحدًا على الأقل.'); return; }
-
-    els.meta.textContent = `رقم الباب ${els.gateNo.value||'-'} – ${els.gateName.value||'-'} | العميل: ${els.clientName.value||'-'} | الموقع: ${els.siteName.value||'-'}`;
-    els.clientDate.textContent = els.todayInput.value || todayISO;
-
-    if(state.logoDataURL){ els.logoClient.src = state.logoDataURL; els.logoClient.hidden=false; }
-    else { els.logoClient.hidden=true; }
-
-    els.clientForm.innerHTML = '';
-    selected.forEach((r, idx)=>{
-      const fieldId = `f_${idx}`;
-      const wrap = document.createElement('div');
-      wrap.className = 'card';
-      wrap.style.margin = '10px 0';
-      wrap.innerHTML = `
-        <div class="row">
-          <div class="col-12"><strong>${idx+1}.</strong> ${r.text}</div>
-          <div class="col-4">
-            <label>الاستجابة</label>
-            ${r.kind==='yn'
-              ? `<div class="center" style="gap:12px">
-                    <label class="pill"><input type="radio" name="resp_${fieldId}" value="صح"> صح</label>
-                    <label class="pill"><input type="radio" name="resp_${fieldId}" value="خطأ"> خطأ</label>
-                 </div>`
-              : `<select name="resp_${fieldId}">
-                    <option value="">— اختر التقييم —</option>
-                    <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-                 </select>`}
-          </div>
-          <div class="col-8"><label>ملاحظة (حتى 50 حرفًا)
-            <input type="text" name="note_${fieldId}" maxlength="50" placeholder="ملاحظة قصيرة">
-          </label></div>
-        </div>`;
-      els.clientForm.appendChild(wrap);
+    list.forEach((r,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `<td class="num">${i+1}</td>
+                      <td>${r.text}</td>
+                      <td class="chk"><input type="checkbox" name="ok_${i}" class="ok"></td>
+                      <td class="chk"><input type="checkbox" name="no_${i}" class="no"></td>
+                      <td class="note"><input type="text" maxlength="50" placeholder="حتى 50 حرفًا"></td>`;
+      els.clientBody.appendChild(tr);
     });
 
-    els.admin.classList.add('hidden');
+    // اجعل ✓ و ✗ متنافيين لكل صف
+    els.clientBody.querySelectorAll('tr').forEach(tr=>{
+      const ok=tr.querySelector('.ok'); const no=tr.querySelector('.no');
+      ok.addEventListener('change',()=>{ if(ok.checked) no.checked=false; });
+      no.addEventListener('change',()=>{ if(no.checked) ok.checked=false; });
+    });
+
+    els.setup.classList.add('hidden');
     els.client.classList.remove('hidden');
-    els.inspectDate.value = els.todayInput.value || todayISO;
   };
 
-  els.exportHTML.onclick = ()=>{
-    const selected = state.rows.filter(r=>r.include && r.text.trim());
-    if(selected.length===0){ alert('اختر بندًا واحدًا على الأقل.'); return; }
-
-    const safe = s=>String(s||'').replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-    const blocks = selected.map((r,i)=>`
-      <div style="border:1px solid #ddd;border-radius:12px;padding:10px;margin:8px 0">
-        <div><strong>${i+1}.</strong> ${safe(r.text)}</div>
-        <div style="margin-top:6px">الاستجابة: ${r.kind==='yn'?'صح/خطأ':'تقييم 1–5'} | ملاحظة: حتى 50 حرفًا</div>
-      </div>`).join('');
-
-    const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-      <title>نسخة العميل (ساكنة)</title></head><body style="font-family:Tahoma,Arial,sans-serif;line-height:1.6">
-      ${state.logoDataURL?`<div><img src="${state.logoDataURL}" style="height:60px"></div>`:''}
-      <h2>نسخة العميل – قائمة التدقيق</h2>
-      <div>رقم الباب ${safe(els.gateNo.value)} – ${safe(els.gateName.value)} | العميل: ${safe(els.clientName.value)} | الموقع: ${safe(els.siteName.value)}</div>
-      <div>التاريخ: ${els.todayInput.value||todayISO}</div>
-      <hr>
-      ${blocks}
-      <hr>
-      <div>اسم المدقق: ____________ | توقيع: ____________ | التاريخ: ____________</div>
-      </body></html>`;
-
-    const blob = new Blob([html], {type:'text/html'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `نسخة-العميل-${els.todayInput.value||todayISO}.html`; a.click();
-    URL.revokeObjectURL(url);
+  // تصدير HTML ثابت للعميل (نفس الجدول بدون سكربت)
+  els.exportHtml.onclick=()=>{
+    const list = rows.filter(r=>r.include && r.text.trim());
+    if(!list.length) return alert('اختر بندًا واحدًا على الأقل');
+    const safe=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+    const rowsHtml=list.map((r,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${safe(r.text)}</td><td>☐</td><td>☐</td><td></td></tr>`).join('');
+    const html=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>نسخة العميل</title>
+      <style>body{font-family:Tahoma,Arial;margin:0;background:#f7f8fb;color:#111} .wrap{max-width:900px;margin:auto;padding:16px} .card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px} h2{text-align:center} table{width:100%;border-collapse:collapse;margin-top:10px} th,td{border:1px solid #ccc;padding:8px;text-align:center} th{background:#e6f0ff}</style></head>
+      <body><div class="wrap"><div class="card">${logoData?`<div style="text-align:center"><img src="${logoData}" style="height:60px"></div>`:''}
+      <h2>قائمة تدقيق السلامة – الباب ${safe(els.gateNo.value||'-')} – ${safe(els.gateName.value||'')}</h2>
+      <table><thead><tr><th>م</th><th>البند</th><th>✓</th><th>✗</th><th>ملاحظات</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+      <div style="margin-top:12px">اسم العميل: __________ | الموقع: __________ | المدقق: __________ | التاريخ: __________</div></div></div></body></html>`;
+    const blob=new Blob([html],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='نسخة-العميل.html'; a.click(); URL.revokeObjectURL(url);
   };
 
-  function buildSummaryText(){
-    const lines = [];
-    lines.push(`نسخة العميل – قائمة التدقيق`);
-    lines.push(`الباب ${els.gateNo.value||'-'} – ${els.gateName.value||'-'}`);
-    lines.push(`العميل: ${els.clientName.value||'-'} | الموقع: ${els.siteName.value||'-'}`);
-    lines.push(`تاريخ: ${els.inspectDate.value||els.todayInput.value||todayISO}`);
+  // أدوات العميل
+  function summaryTxt(){
+    const lines=[]; lines.push(els.titleTxt.textContent);
+    lines.push(`اسم العميل: ${els.cClient.value||'-'} | الموقع: ${els.cSite.value||'-'} | المدقق: ${els.cAuditor.value||'-'} | التاريخ: ${els.cDate.value||'-'}`);
     lines.push('---');
-    const blocks = els.clientForm.querySelectorAll('.card');
-    blocks.forEach((b, i)=>{
-      const text = b.querySelector('div strong').parentNode.textContent.replace(/^\\d+\\.\\s*/, '').trim();
-      let resp = '';
-      const radios = b.querySelectorAll(`input[name="resp_f_${i}"]`);
-      if(radios.length){
-        const checked = Array.from(radios).find(r=>r.checked); resp = checked? checked.value: '';
-      } else {
-        const sel = b.querySelector('select[name="resp_f_'+i+'"]'); resp = sel? (sel.value||''):'';
-      }
-      const note = (b.querySelector(`input[name="note_f_${i}"]`)||{}).value||'';
-      lines.push(`${i+1}) ${text} | ${resp||'—'} ${note? ' | ملاحظة: '+note: ''}`);
+    els.clientBody.querySelectorAll('tr').forEach((tr,i)=>{
+      const item=tr.children[1].textContent.trim();
+      const ok=tr.querySelector('.ok').checked? '✓':'-';
+      const no=tr.querySelector('.no').checked? '✗':'-';
+      const note=tr.querySelector('input[type="text"]').value.trim();
+      lines.push(`${i+1}) ${item} | ${ok}/${no}${note? ' | ملاحظة: '+note:''}`);
     });
-    lines.push('---');
-    lines.push(`المدقق: ${els.auditorName.value||'-'}`);
-    return lines.join('\\n');
+    return lines.join('
+');
   }
 
-  els.printBtn.onclick = ()=> window.print();
-  els.sendWA.onclick = ()=>{ const text = buildSummaryText(); const url = 'https://wa.me/?text=' + encodeURIComponent(text); window.open(url, '_blank'); };
-  els.sendEmail.onclick = ()=>{
-    const subject = `نسخة العميل – ${els.clientName.value||''} – ${els.gateName.value||''}`.trim();
-    const body = buildSummaryText();
-    const mail = `mailto:ergonomicindustrial@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mail;
-  };
+  els.printBtn.onclick=()=>window.print();
+  els.waBtn.onclick=()=>{ const url='https://wa.me/?text='+encodeURIComponent(summaryTxt()); window.open(url,'_blank'); };
+  els.mailBtn.onclick=()=>{ const sub='نسخة العميل'; const body=summaryTxt(); location.href=`mailto:ergonomicindustrial@gmail.com?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`; };
+  els.back.onclick=()=>{ els.client.classList.add('hidden'); els.setup.classList.remove('hidden'); };
 
-  function seedIfEmpty(){
-    if(state.rows.length) return;
-    ['تزويد الآلات بحواجز أمان مناسبة','لوحات التحذير مثبتة في الأماكن الخطرة','تدريب العاملين على تشغيل الآلات بأمان','وجود خطة استجابة للطوارئ وإسعافات أولية','سجلات الصيانة محدثة أسبوعيًا'].forEach(t=> addRow(t));
-  }
-
-  loadDraft();
-  seedIfEmpty();
-  ['gateNo','gateName','todayInput','clientName','siteName','defaultResp'].forEach(id=>{
-    els[id].addEventListener('input', persist);
-    els[id].addEventListener('change', persist);
-  });
+  // بيانات افتراضية أول مرة
+  function seed(){ if(rows.length) return; ['التأكد من وجود دليل إرشادي للسلامة','تحديد مخاطر العمل','توفير معدات الوقاية الشخصية','فحص معدات الإطفاء وصلاحيتها'].forEach(t=>addRow(t)); }
+  load(); seed();
+})();
 </script>
 </body>
 </html>
-"""
-
-static_client = """<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نسخة العميل – نموذج ثابت للطباعة</title>
-<style>
-  body{margin:0;background:#f7f8fb;color:#111;font-family:"Noto Kufi Arabic","Cairo",Tahoma,Arial,sans-serif}
-  .wrap{max-width:900px;margin:auto;padding:16px}
-  .card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px}
-  h1{margin:.3rem 0 1rem;font-size:22px;color:#2563eb;text-align:center}
-  table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{border:1px solid #ddd;padding:8px;vertical-align:top}
-  th{background:#eef2ff}
-  .toolbar{display:flex;gap:8px;margin:10px 0}
-  @media print{.no-print{display:none} body{background:#fff} .card{border:0;box-shadow:none}}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="card">
-    <h1>✅ نسخة العميل – نموذج ثابت للطباعة</h1>
-    <div class="toolbar">
-      <div style="flex:1">رقم الباب: __________</div>
-      <div style="flex:2">اسم الباب: __________________________</div>
-      <div style="flex:1">التاريخ: ____ / ____ / ______</div>
-    </div>
-    <div class="toolbar">
-      <div style="flex:1">اسم العميل: ____________________</div>
-      <div style="flex:1">الموقع: ____________________</div>
-      <div style="flex:1">اسم المدقق: ____________________</div>
-    </div>
-    <table>
-      <thead><tr><th style="width:40px">#</th><th>البند</th><th style="width:140px">الاستجابة</th><th style="width:200px">ملاحظة (≤50)</th></tr></thead>
-      <tbody>
-        <tr><td>1</td><td>تزويد الآلات بحواجز أمان مناسبة</td><td>صح ☐ خطأ ☐ / 1 2 3 4 5</td><td></td></tr>
-        <tr><td>2</td><td>لوحات التحذير مثبتة في الأماكن الخطرة</td><td>صح ☐ خطأ ☐ / 1 2 3 4 5</td><td></td></tr>
-        <tr><td>3</td><td>تدريب العاملين على تشغيل الآلات بأمان</td><td>صح ☐ خطأ ☐ / 1 2 3 4 5</td><td></td></tr>
-        <tr><td>4</td><td>وجود خطة استجابة للطوارئ وإسعافات أولية</td><td>صح ☐ خطأ ☐ / 1 2 3 4 5</td><td></td></tr>
-        <tr><td>5</td><td>سجلات الصيانة محدثة أسبوعيًا</td><td>صح ☐ خطأ ☐ / 1 2 3 4 5</td><td></td></tr>
-      </tbody>
-    </table>
-    <div style="margin-top:14px">التوقيع: _______________________ التاريخ: ____ / ____ / ______</div>
-    <div class="no-print" style="margin-top:10px"><button onclick="window.print()">🖨️ طباعة</button> <a href="mailto:ergonomicindustrial@gmail.com?subject=%D9%86%D8%B3%D8%AE%D8%A9%20%D8%A7%D9%84%D8%B9%D9%85%D9%8A%D9%84">✉️ إرسال بالبريد</a> <a href="https://wa.me/?text=%D9%86%D8%B3%D8%AE%D8%A9%20%D8%A7%D9%84%D8%B9%D9%85%D9%8A%D9%84" target="_blank">📲 واتساب</a></div>
-  </div>
-</div>
-</body>
-</html>
-"""
-
-p1 = Path("/mnt/data/نسخة-العميل-إصدار-مستقل.html")
-p1.write_text(standalone_html, encoding="utf-8")
-
-p2 = Path("/mnt/data/نسخة-العميل-نموذج-ثابت.html")
-p2.write_text(static_client, encoding="utf-8")
-
-str(p1), str(p2)
