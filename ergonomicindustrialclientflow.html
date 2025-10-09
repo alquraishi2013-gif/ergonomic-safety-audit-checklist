@@ -3,231 +3,349 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نسخة العميل – مطابقة للاتفاق (✓ / ✗ + ملاحظات ≤50)</title>
+<title>نسخة العميل – إرسال وتدقيق وإعادة الإرسال (v3.0)</title>
 <style>
-  :root{--bg:#f7f8fb;--ink:#111;--muted:#666;--line:#e5e7eb;--card:#fff;--accent:#2563eb;--head:#e6f0ff}
+  :root{--bg:#f7f8fb;--ink:#111;--muted:#555;--line:#e5e7eb;--card:#fff;--accent:#2563eb;--head:#e6f0ff}
   *{box-sizing:border-box}
+  html, body, input, select, textarea, button, table{font-variant-numeric:lining-nums tabular-nums}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Kufi Arabic","Cairo",Tahoma,Arial,sans-serif}
-  .wrap{max-width:980px;margin:auto;padding:18px}
-  .sheet{background:var(--card);border:1px solid #d9dde5;border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
-  .title{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
-  .logo{height:64px;object-fit:contain}
-  h1{margin:.2rem 0 .6rem;font-size:22px}
-  .meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:420px;margin-inline-start:auto}
-  .meta label{display:flex;gap:6px;align-items:center;font-size:14px;color:#333}
-  .meta input{flex:1;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  .wrap{max-width:1100px;margin:auto;padding:18px}
+  .card{background:var(--card);border:1px solid #d9dde5;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+  .title{display:flex;align-items:center;gap:12px}
+  .title h1{margin:0;font-size:20px}
+  .logo{height:56px;object-fit:contain}
+  .row{display:grid;gap:10px}
+  @media(min-width:768px){.row{grid-template-columns:repeat(12,1fr)}.col-3{grid-column:span 3}.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-8{grid-column:span 8}.col-12{grid-column:span 12}}
+  input[type=text],input[type=date],input[type=email],input[type=search],select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  textarea{min-height:110px}
   table{width:100%;border-collapse:collapse;margin-top:10px}
   th,td{border:1px solid #cfd7e3;padding:8px;vertical-align:middle}
   th{background:var(--head);text-align:center}
-  td.num{width:48px;text-align:center}
-  td.chk{text-align:center;width:46px}
-  td.note input{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px}
-  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  td.num{width:54px;text-align:center}
+  td[contenteditable]{outline:0;min-height:28px;word-break:break-word}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
   .btn{padding:10px 14px;border-radius:10px;border:1px solid #d0d7ff;background:#fff;cursor:pointer}
   .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .muted{color:var(--muted);font-size:13px}
-  .box{border:1px dashed #cfd7e3;border-radius:10px;padding:10px;margin:8px 0}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#eef2ff;border:1px solid #c7d2fe;font-size:.85rem;color:#374151}
   .hidden{display:none!important}
-  @media print{.no-print{display:none!important}.sheet{border:0;box-shadow:none}body{background:#fff}}
+  .footer{margin-top:18px;font-size:12px;color:#334155;text-align:center;border-top:1px solid #d9dde5;padding-top:10px}
+  .footer a{color:#2563eb;text-decoration:none}
+  .muted{color:var(--muted);font-size:13px}
+  @media print{.no-print{display:none!important}.card{border:0;box-shadow:none}body{background:#fff}@page{size:A4;margin:12mm} tr,td,th{page-break-inside:avoid}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <!-- لوحة الإعداد (المصمم) -->
-  <div id="setup" class="sheet">
-    <div class="title">
-      <img id="lg" class="logo" alt="logo" hidden>
-      <h1>🧾 إعداد البنود – نسخة العميل</h1>
-    </div>
-    <div class="box">
-      <div class="muted">**الورك فلو المتفق عليه**: مني كمصمم ➜ العميل ➜ المدقق ➜ العميل ➜ أرجع لي. نسخة العميل ستحتوي فقط البنود التي أحددها هنا.</div>
+  <section id="clientApp" class="card">
+    <div class="title" style="gap:14px;align-items:center">
+      <img id="brandTop" alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" class="logo">
+      <h1>نسخة العميل – إرسال وتدقيق وإعادة الإرسال</h1>
+      <span style="margin-inline-start:auto"></span>
+      <div class="no-print" style="display:flex;gap:8px;align-items:center">
+        <span class="pill">المرحلة الحالية</span>
+        <select id="phaseSel">
+          <option value="client_init">١) من العميل إلى المدقق</option>
+          <option value="auditor_action">٢) المدقق يملأ التدقيق</option>
+          <option value="client_approve">٣) اعتماد العميل وإرساله للمصمم</option>
+        </select>
+        <button class="btn" id="printBtn">🖨️ طباعة</button>
+      </div>
     </div>
 
-    <div class="toolbar">
-      <label class="btn no-print"><input type="file" id="logoInput" accept="image/*"> رفع الشعار</label>
+    <p class="muted" id="phaseHint"></p>
+
+    <div class="row" style="margin-top:6px">
+      <div class="col-4"><label>اسم الشركة<br><input id="fCompany" type="text" placeholder="مثال: شركة الخليج"></label></div>
+      <div class="col-4"><label>اسم الموقع<br><input id="fSite" type="text" placeholder="مثال: مصنع الشعيبة"></label></div>
+      <div class="col-4"><label>وصف الموقع<br><input id="fDesc" type="text" placeholder="مكتب / ورشة / …"></label></div>
+      <div class="col-3"><label>رقم الباب<br><input id="fGateNo" type="text" placeholder="1"></label></div>
+      <div class="col-5"><label>اسم الباب<br><input id="fGateName" type="text" placeholder="مثال: الحماية من الآلات"></label></div>
+      <div class="col-4"><label>التاريخ<br><input id="fDate" type="date"></label></div>
+
+      <!-- أطراف التواصل حسب المرحلة -->
+      <div class="col-6"><label>اسم المدقق<br><input id="fAuditorName" type="text" placeholder="مثال: م. أحمد"></label></div>
+      <div class="col-6"><label>إيميل المدقق<br><input id="fAuditorMail" type="email" placeholder="auditor@example.com"></label></div>
+      <div class="col-6"><label>هاتف/واتساب المدقق (اختياري مع مفتاح الدولة)<br><input id="fAuditorPhone" type="text" placeholder="+9655xxxxxxx"></label></div>
+
+      <div class="col-6"><label>إيميل العميل (لاستلام نتيجة التدقيق)<br><input id="fClientMail" type="email" placeholder="client@example.com"></label></div>
+    </div>
+
+    <div class="toolbar no-print">
+      <span class="pill">بنود التدقيق</span>
       <button class="btn" id="addRow">➕ إضافة بند</button>
-      <button class="btn" id="selectAll">✔️ تحديد الكل</button>
-      <button class="btn" id="clearAll">❌ إلغاء التحديد</button>
-      <button class="btn" id="save">💾 حفظ مسودة</button>
-      <button class="btn" id="reset">إعادة تعيين</button>
-      <span class="muted">يمكنك تعديل نص البند مباشرة في الجدول</span>
+      <button class="btn" id="clearRows">🗑️ مسح الكل</button>
+      <span class="muted">— يمكن للمدقق تعديل البنود أو النوع أثناء المرحلة (٢)</span>
     </div>
 
     <table>
       <thead>
         <tr>
-          <th style="width:74px">تضمين</th>
-          <th>نص البند</th>
+          <th style="width:60px">م</th>
+          <th>البند</th>
+          <th style="width:140px">نوع</th>
+          <th colspan="2">حقل التقييم</th>
+          <th style="width:220px">ملاحظات (≤50)</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
 
-    <div class="toolbar">
-      <label>رقم الباب <input id="gateNo" type="text" placeholder="1"></label>
-      <label>اسم الباب <input id="gateName" type="text" placeholder="الأحكام العامة"></label>
-      <label>تاريخ الإصدار <input id="issueDate" type="date"></label>
-      <button class="btn primary" id="build">🚀 إنشاء نسخة العميل</button>
-      <button class="btn" id="exportHtml">⬇️ تصدير HTML للعميل</button>
-    </div>
-  </div>
-
-  <!-- نسخة العميل النهائية (✓ / ✗ + ملاحظة ≤ 50) -->
-  <div id="client" class="sheet hidden">
-    <div class="title">
-      <img id="lg2" class="logo" alt="logo" hidden>
-      <h1 id="titleTxt">قائمة تدقيق السلامة – الباب</h1>
+    <div class="toolbar no-print" style="justify-content:flex-end">
+      <button class="btn" id="exportHtml">⬇️ تصدير HTML</button>
+      <button class="btn" id="copySummary">📋 نسخ ملخّص</button>
+      <button class="btn primary" id="shareAction">📤 إرسال حسب المرحلة</button>
     </div>
 
-    <div class="meta">
-      <label>اسم العميل: <input id="cClient" type="text" placeholder="اسم العميل"></label>
-      <label>اسم الموقع: <input id="cSite" type="text" placeholder="الموقع"></label>
-      <label>المدقق: <input id="cAuditor" type="text" placeholder="اسم المدقق"></label>
-      <label>التاريخ: <input id="cDate" type="date"></label>
+    <div class="footer no-print">
+      Ergonomic Industrial — <a href="https://ergonomicindustrial.com" target="_blank">ergonomicindustrial.com</a> — Email: <a href="mailto:ergonomicindustrial@gmail.com">ergonomicindustrial@gmail.com</a> — Phone/WhatsApp: 67756743
     </div>
-
-    <table id="clientTable">
-      <thead>
-        <tr>
-          <th>م</th>
-          <th>البند</th>
-          <th>✓</th>
-          <th>✗</th>
-          <th>ملاحظات</th>
-        </tr>
-      </thead>
-      <tbody id="clientBody"></tbody>
-    </table>
-
-    <div class="toolbar no-print">
-      <button class="btn primary" id="printBtn">🖨️ طباعة</button>
-      <button class="btn" id="waBtn">📲 إرسال واتساب</button>
-      <button class="btn" id="mailBtn">✉️ إرسال بريد</button>
-      <button class="btn" id="back">↩️ رجوع للتعديل</button>
-    </div>
-  </div>
+  </section>
 </div>
 
 <script>
 (function(){
   const $ = s=>document.querySelector(s);
-  const els = {
-    setup: $('#setup'), client: $('#client'),
-    lg: $('#lg'), lg2: $('#lg2'), logoInput: $('#logoInput'),
-    tbody: $('#tbody'), addRow: $('#addRow'), selectAll: $('#selectAll'), clearAll: $('#clearAll'),
-    save: $('#save'), reset: $('#reset'), gateNo: $('#gateNo'), gateName: $('#gateName'), issueDate: $('#issueDate'),
-    build: $('#build'), exportHtml: $('#exportHtml'),
-    titleTxt: $('#titleTxt'), cClient: $('#cClient'), cSite: $('#cSite'), cAuditor: $('#cAuditor'), cDate: $('#cDate'),
-    clientBody: $('#clientBody'), printBtn: $('#printBtn'), waBtn: $('#waBtn'), mailBtn: $('#mailBtn'), back: $('#back')
-  };
-  const today = new Date().toISOString().slice(0,10);
-  els.issueDate.value = today; els.cDate.value = today;
+  const S = s=>document.querySelectorAll(s);
 
-  let logoData = '';
-  let rows = []; // {id,text,include}
+  const els = {
+    tbody: $('#tbody'), addRow: $('#addRow'), clearRows: $('#clearRows'),
+    exportHtml: $('#exportHtml'), copySummary: $('#copySummary'), shareAction: $('#shareAction'),
+    phaseSel: $('#phaseSel'), phaseHint: $('#phaseHint'), printBtn: $('#printBtn'),
+    fCompany: $('#fCompany'), fSite: $('#fSite'), fDesc: $('#fDesc'), fGateNo: $('#fGateNo'), fGateName: $('#fGateName'), fDate: $('#fDate'),
+    fAuditorName: $('#fAuditorName'), fAuditorMail: $('#fAuditorMail'), fAuditorPhone: $('#fAuditorPhone'), fClientMail: $('#fClientMail')
+  };
+
+  const DESIGNER_EMAIL_FINAL = 'ergomomicindustrial@gmail.com'; // طلب المستخدم النهائي
+  const LS_KEY = 'client_flow_v3_0';
+  let rows = []; // {id,text,type,sel}
 
   function uid(){return Math.random().toString(36).slice(2)}
-  function persist(){ localStorage.setItem('agreed_client_rows', JSON.stringify({logoData, rows, gateNo:els.gateNo.value, gateName:els.gateName.value, issueDate:els.issueDate.value})); }
-  function load(){
-    const s = localStorage.getItem('agreed_client_rows'); if(!s) return;
-    try{ const d = JSON.parse(s); logoData=d.logoData||''; rows=Array.isArray(d.rows)?d.rows:[]; if(logoData){els.lg.src=logoData;els.lg.hidden=false}
-      els.gateNo.value=d.gateNo||''; els.gateName.value=d.gateName||''; els.issueDate.value=d.issueDate||today; renderSetup(); }catch(e){}
+  function escapeHtml(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+  function today(){return new Date().toISOString().slice(0,10)}
+
+  // تلميح المرحلة
+  const PHINT = {
+    client_init: 'المرحلة (١): يقوم العميل بإدخال بيانات الموقع واسم/إيميل المدقق ثم يرسل النموذج للمدقق عبر الإيميل أو الواتساب.',
+    auditor_action: 'المرحلة (٢): المدقق يراجع البنود ويعبّئ الحقول (✔/✖ أو 1–5) ثم يعيد الإرسال إلى العميل.',
+    client_approve: 'المرحلة (٣): العميل يراجع نتيجة التدقيق ويعتمدها ثم يرسل النسخة النهائية إلى المصمم.'
+  };
+
+  // أنواع التقييم
+  const TYPE_TXT = { yesno: '✔/✖', scale: '1–5', note: 'ملاحظة فقط' };
+
+  // قِيَم افتراضية
+  els.fDate.value = today();
+
+  // رسم صف
+  function makeRow(r,i){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="num">${i+1}</td>
+      <td contenteditable class="txt" data-id="${r.id}">${escapeHtml(r.text||'* بند جديد')}</td>
+      <td style="text-align:center">
+        <select class="typeSel" data-id="${r.id}">
+          <option value="yesno" ${r.type==='yesno'?'selected':''}>${TYPE_TXT.yesno}</option>
+          <option value="scale" ${r.type==='scale'?'selected':''}>${TYPE_TXT.scale}</option>
+          <option value="note" ${r.type==='note'?'selected':''}>${TYPE_TXT.note}</option>
+        </select>
+      </td>
+      <td colspan="2" style="text-align:center">${inputForType(r.type, i, r.sel||'')}</td>
+      <td><input type="text" class="note" data-id="${r.id}" maxlength="50" placeholder="حتى 50 حرفًا" value="${r.note?escapeHtml(r.note):''}"></td>
+    `;
+    return tr;
   }
 
-  function renderSetup(){
+  function inputForType(type, idx, sel){
+    if(type==='yesno'){
+      const ok = sel==='ok'? 'checked':''; const no = sel==='no'? 'checked':'';
+      return `<label style="margin-inline:6px"><input type="radio" name="r${idx}" value="ok" ${ok}> ✔</label>
+              <label style="margin-inline:6px"><input type="radio" name="r${idx}" value="no" ${no}> ✖</label>`;
+    } else if(type==='scale') {
+      const opts = ['','1','2','3','4','5'].map(v=>`<option ${sel===v?'selected':''}>${v}</option>`).join('');
+      return `<select class="scaleSel" data-idx="${idx}">${opts}</select>`;
+    }
+    return '<span class="muted">—</span>';
+  }
+
+  function render(){
     els.tbody.innerHTML='';
-    rows.forEach(r=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML=`<td style="width:74px;text-align:center"><input type="checkbox" class="pick" data-id="${r.id}" ${r.include?'checked':''}></td>
-                    <td contenteditable class="txt" data-id="${r.id}">${r.text}</td>`;
-      els.tbody.appendChild(tr);
-    });
+    const frag = document.createDocumentFragment();
+    rows.forEach((r,i)=> frag.appendChild(makeRow(r,i)) );
+    els.tbody.appendChild(frag);
   }
 
-  function addRow(text){ rows.push({id:uid(), text:text||'* بند جديد', include:true}); renderSetup(); persist(); }
+  function addRow(text){ rows.push({id:uid(), text:text||'', type:'yesno', sel:'', note:''}); render(); persist(); }
 
-  els.addRow.onclick=()=>addRow();
-  els.selectAll.onclick=()=>{ rows.forEach(r=>r.include=true); renderSetup(); persist(); };
-  els.clearAll.onclick=()=>{ rows.forEach(r=>r.include=false); renderSetup(); persist(); };
-  els.tbody.addEventListener('input', e=>{ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(!r) return; r.text=e.target.innerText.trim(); persist(); });
-  els.tbody.addEventListener('change', e=>{ if(e.target.classList.contains('pick')){ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.include=e.target.checked; persist(); } }});
+  // حفظ واسترجاع
+  function collectMeta(){
+    return {
+      company: els.fCompany.value, site: els.fSite.value, desc: els.fDesc.value,
+      gateNo: els.fGateNo.value, gateName: els.fGateName.value, date: els.fDate.value,
+      auditorName: els.fAuditorName.value, auditorMail: els.fAuditorMail.value, auditorPhone: els.fAuditorPhone.value,
+      clientMail: els.fClientMail.value, phase: els.phaseSel.value
+    };
+  }
 
-  els.logoInput.addEventListener('change', e=>{
-    const f=e.target.files[0]; if(!f){logoData=''; els.lg.hidden=true; return;}
-    const rd=new FileReader(); rd.onload=ev=>{logoData=ev.target.result; els.lg.src=logoData; els.lg.hidden=false; persist();}; rd.readAsDataURL(f);
+  function persist(){
+    try{ localStorage.setItem(LS_KEY, JSON.stringify({meta:collectMeta(), rows})) }catch(e){}
+  }
+  function restore(){
+    const raw = localStorage.getItem(LS_KEY); if(!raw) return;
+    try{
+      const d = JSON.parse(raw);
+      const m = d.meta||{};
+      els.fCompany.value=m.company||''; els.fSite.value=m.site||''; els.fDesc.value=m.desc||'';
+      els.fGateNo.value=m.gateNo||''; els.fGateName.value=m.gateName||''; els.fDate.value=m.date||today();
+      els.fAuditorName.value=m.auditorName||''; els.fAuditorMail.value=m.auditorMail||''; els.fAuditorPhone.value=m.auditorPhone||'';
+      els.fClientMail.value=m.clientMail||''; els.phaseSel.value=m.phase||'client_init';
+      rows = Array.isArray(d.rows)? d.rows.map(x=>({id:x.id||uid(), text:x.text||'', type:x.type||'yesno', sel:x.sel||'', note:x.note||''})) : [];
+      render(); updatePhaseHint();
+    }catch(e){}
+  }
+
+  function updatePhaseHint(){ els.phaseHint.textContent = PHINT[els.phaseSel.value]||'' }
+
+  // أحداث الجدول
+  els.tbody.addEventListener('input', e=>{
+    if(e.target.classList.contains('txt')){
+      const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.text=e.target.innerText.trim(); persist(); }
+    }
+    if(e.target.classList.contains('note')){
+      const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.note=e.target.value; persist(); }
+    }
+  });
+  els.tbody.addEventListener('change', e=>{
+    if(e.target.classList.contains('typeSel')){
+      const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.type=e.target.value; r.sel=''; render(); persist(); }
+    }
+    if(e.target.matches('input[type=radio]')){
+      const name=e.target.name; const idx=parseInt(name.replace(/^r/,''),10); const r=rows[idx]; if(r){ r.sel=e.target.value; persist(); }
+    }
+    if(e.target.classList.contains('scaleSel')){
+      const idx=parseInt(e.target.dataset.idx,10); const r=rows[idx]; if(r){ r.sel=e.target.value; persist(); }
+    }
   });
 
-  els.save.onclick=()=>{persist(); alert('تم حفظ المسودة محليًا');};
-  els.reset.onclick=()=>{ if(confirm('مسح كل البيانات؟')){ localStorage.removeItem('agreed_client_rows'); rows=[]; logoData=''; els.lg.hidden=true; renderSetup(); } };
+  els.addRow.onclick = ()=> addRow('* بند جديد');
+  els.clearRows.onclick = ()=>{ if(confirm('مسح كل البنود؟')){ rows=[]; render(); persist(); } };
 
-  // إنشاء نسخة العميل
-  els.build.onclick=()=>{
-    const list = rows.filter(r=>r.include && r.text.trim());
-    if(!list.length) return alert('اختر بندًا واحدًا على الأقل');
-    els.titleTxt.textContent = `قائمة تدقيق السلامة – الباب ${els.gateNo.value||'-'} – ${els.gateName.value||''}`;
-    els.clientBody.innerHTML='';
-    if(logoData){els.lg2.src=logoData; els.lg2.hidden=false}else{els.lg2.hidden=true}
-
-    list.forEach((r,i)=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML = `<td class="num">${i+1}</td>
-                      <td>${r.text}</td>
-                      <td class="chk"><input type="checkbox" name="ok_${i}" class="ok"></td>
-                      <td class="chk"><input type="checkbox" name="no_${i}" class="no"></td>
-                      <td class="note"><input type="text" maxlength="50" placeholder="حتى 50 حرفًا"></td>`;
-      els.clientBody.appendChild(tr);
-    });
-
-    // اجعل ✓ و ✗ متنافيين لكل صف
-    els.clientBody.querySelectorAll('tr').forEach(tr=>{
-      const ok=tr.querySelector('.ok'); const no=tr.querySelector('.no');
-      ok.addEventListener('change',()=>{ if(ok.checked) no.checked=false; });
-      no.addEventListener('change',()=>{ if(no.checked) ok.checked=false; });
-    });
-
-    els.setup.classList.add('hidden');
-    els.client.classList.remove('hidden');
-  };
-
-  // تصدير HTML ثابت للعميل (نفس الجدول بدون سكربت)
-  els.exportHtml.onclick=()=>{
-    const list = rows.filter(r=>r.include && r.text.trim());
-    if(!list.length) return alert('اختر بندًا واحدًا على الأقل');
-    const safe=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-    const rowsHtml=list.map((r,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${safe(r.text)}</td><td>☐</td><td>☐</td><td></td></tr>`).join('');
-    const html=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>نسخة العميل</title>
-      <style>body{font-family:Tahoma,Arial;margin:0;background:#f7f8fb;color:#111} .wrap{max-width:900px;margin:auto;padding:16px} .card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px} h2{text-align:center} table{width:100%;border-collapse:collapse;margin-top:10px} th,td{border:1px solid #ccc;padding:8px;text-align:center} th{background:#e6f0ff}</style></head>
-      <body><div class="wrap"><div class="card">${logoData?`<div style="text-align:center"><img src="${logoData}" style="height:60px"></div>`:''}
-      <h2>قائمة تدقيق السلامة – الباب ${safe(els.gateNo.value||'-')} – ${safe(els.gateName.value||'')}</h2>
-      <table><thead><tr><th>م</th><th>البند</th><th>✓</th><th>✗</th><th>ملاحظات</th></tr></thead><tbody>${rowsHtml}</tbody></table>
-      <div style="margin-top:12px">اسم العميل: __________ | الموقع: __________ | المدقق: __________ | التاريخ: __________</div></div></div></body></html>`;
-    const blob=new Blob([html],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='نسخة-العميل.html'; a.click(); URL.revokeObjectURL(url);
-  };
-
-  // أدوات العميل
-  function summaryTxt(){
-    const lines=[]; lines.push(els.titleTxt.textContent);
-    lines.push(`اسم العميل: ${els.cClient.value||'-'} | الموقع: ${els.cSite.value||'-'} | المدقق: ${els.cAuditor.value||'-'} | التاريخ: ${els.cDate.value||'-'}`);
-    lines.push('---');
-    els.clientBody.querySelectorAll('tr').forEach((tr,i)=>{
-      const item=tr.children[1].textContent.trim();
-      const ok=tr.querySelector('.ok').checked? '✓':'-';
-      const no=tr.querySelector('.no').checked? '✗':'-';
-      const note=tr.querySelector('input[type="text"]').value.trim();
-      lines.push(`${i+1}) ${item} | ${ok}/${no}${note? ' | ملاحظة: '+note:''}`);
-    });
-    return lines.join('
-');
+  // مشاركة
+  function buildTitle(){
+    const m=collectMeta();
+    return `${m.company||'-'} | باب ${m.gateNo||'-'} – ${m.gateName||''} | ${m.date||''}`;
   }
 
-  els.printBtn.onclick=()=>window.print();
-  els.waBtn.onclick=()=>{ const url='https://wa.me/?text='+encodeURIComponent(summaryTxt()); window.open(url,'_blank'); };
-  els.mailBtn.onclick=()=>{ const sub='نسخة العميل'; const body=summaryTxt(); location.href=`mailto:ergonomicindustrial@gmail.com?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`; };
-  els.back.onclick=()=>{ els.client.classList.add('hidden'); els.setup.classList.remove('hidden'); };
+  function summaryText(){
+    const m=collectMeta();
+    const lines=[
+      `العنوان: ${buildTitle()}`,
+      `الشركة: ${m.company||'-'}`,
+      `الموقع: ${m.site||'-'}`,
+      `الوصف: ${m.desc||'-'}`,
+      `الباب: ${m.gateNo||'-'} – ${m.gateName||''}`,
+      `التاريخ: ${m.date||''}`,
+      `المدقق: ${m.auditorName||'-'} (${m.auditorMail||'-'})`,
+      '',
+      '— البنود —'
+    ];
+    rows.forEach((r,i)=>{
+      const sel = r.type==='yesno'? (r.sel===''?'':(r.sel==='ok'?'✔':'✖')) : (r.type==='scale'? (r.sel||'') : '—');
+      lines.push(`${i+1}. ${r.text||''} | نوع: ${TYPE_TXT[r.type]} | قيمة: ${sel} | ملاحظة: ${r.note||''}`);
+    });
+    const footer = [
+      '',
+      'Ergonomic Industrial — ergonomicindustrial.com',
+      'Email: ergonomicindustrial@gmail.com | WhatsApp: 67756743'
+    ];
+    return lines.concat(footer).join('\n');
+  }
 
-  // بيانات افتراضية أول مرة
-  function seed(){ if(rows.length) return; ['التأكد من وجود دليل إرشادي للسلامة','تحديد مخاطر العمل','توفير معدات الوقاية الشخصية','فحص معدات الإطفاء وصلاحيتها'].forEach(t=>addRow(t)); }
-  load(); seed();
+  els.copySummary.onclick = ()=>{
+    const txt = summaryText();
+    navigator.clipboard && navigator.clipboard.writeText(txt).then(()=>{ alert('تم نسخ الملخص للنقل') }).catch(()=>{ alert('تعذر النسخ تلقائيًا — انسخ يدويًا') });
+  };
+
+  function exportHTML(){
+    const m=collectMeta();
+    const rowsHtml = rows.map((r,i)=>{
+      const typeTxt = TYPE_TXT[r.type];
+      let field = '';
+      if(r.type==='yesno') field = '<td style="text-align:center">☐ ✔</td><td style="text-align:center">☐ ✖</td>';
+      else if(r.type==='scale') field = '<td colspan="2" style="text-align:center">1 2 3 4 5</td>';
+      else field = '<td colspan="2" style="text-align:center">—</td>';
+      return `<tr><td style="text-align:center">${i+1}</td><td>${escapeHtml(r.text||'')}</td><td style="text-align:center">${typeTxt}</td>${field}<td>${escapeHtml(r.note||'')}</td></tr>`;
+    }).join('');
+
+    const brandTop = `<div style="text-align:end"><img alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" style="height:48px"></div>`;
+    const footer = `<div style="margin-top:14px;padding:10px 12px;border-top:1px solid #e5e7eb;color:#334155;font-size:12px;text-align:center">
+      <div>Ergonomic Industrial — <a href="https://ergonomicindustrial.com" target="_blank">ergonomicindustrial.com</a></div>
+      <div>Email: <a href="mailto:ergonomicindustrial@gmail.com">ergonomicindustrial@gmail.com</a> | Phone/WhatsApp: 67756743</div>
+    </div>`;
+
+    const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${buildTitle()}</title>
+    <style>body{font-family:Tahoma,Arial;margin:0;background:#f7f8fb;color:#111;font-variant-numeric:lining-nums tabular-nums} .wrap{max-width:900px;margin:auto;padding:16px} .card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px} h2{text-align:center;margin:.2rem 0 .6rem} table{width:100%;border-collapse:collapse;margin-top:10px} th,td{border:1px solid #ccc;padding:8px;vertical-align:middle} th{background:#e6f0ff;text-align:center} a{color:#2563eb} @page{size:A4;margin:12mm} tr,td,th{page-break-inside:avoid}</style></head>
+    <body><div class="wrap"><div class="card">${brandTop}
+    <h2>${buildTitle()}</h2>
+    <div style="margin:6px 0 10px;color:#333">اسم الشركة: ${escapeHtml(m.company||'-')} | اسم الموقع: ${escapeHtml(m.site||'-')} | وصف الموقع: ${escapeHtml(m.desc||'-')} | التاريخ: ${escapeHtml(m.date||'')}</div>
+    <table><thead><tr><th>م</th><th>البند</th><th>نوع</th><th colspan="2">حقل التقييم</th><th>ملاحظات</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+    ${footer}
+    </div></div></body></html>`;
+
+    const fname = suggestFileName()+'.html';
+    const blob=new Blob([html],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=fname; a.click(); URL.revokeObjectURL(url);
+  }
+
+  function suggestFileName(){
+    const m=collectMeta();
+    const sanitize = s=>String(s||'').trim().replace(/\s+/g,'-').replace(/[^\w\-]/g,'');
+    return [sanitize(m.company||'Client'),sanitize(m.site||'Site'),`G${sanitize(m.gateNo||'0')}`, (m.date||today())].filter(Boolean).join('_');
+  }
+
+  // إرسال حسب المرحلة
+  function shareByPhase(){
+    const m=collectMeta();
+    if(!m.company || !m.site || !m.auditorName){ alert('رجاءً أكمل: الشركة / الموقع / اسم المدقق'); return; }
+
+    const subject = buildTitle();
+    const body = summaryText()+"\n\n* ملاحظة: أرفِق ملف HTML إن تم تصديره.";
+
+    if(els.phaseSel.value==='client_init'){
+      // إلى المدقق
+      const to = m.auditorMail||'';
+      if(to){ window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; }
+      if(m.auditorPhone){ const wa = 'https://wa.me/'+ encodeURIComponent(m.auditorPhone.replace(/\s+/g,'')) +'?text='+ encodeURIComponent(body); window.open(wa,'_blank'); }
+    }
+    else if(els.phaseSel.value==='auditor_action'){
+      // إلى العميل
+      if(m.clientMail){ window.location.href = `mailto:${encodeURIComponent(m.clientMail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; }
+      if(m.auditorPhone){ const wa = 'https://wa.me/'+ encodeURIComponent(m.auditorPhone.replace(/\s+/g,'')) +'?text='+ encodeURIComponent('تم استكمال التدقيق\n\n'+body); window.open(wa,'_blank'); }
+    }
+    else if(els.phaseSel.value==='client_approve'){
+      // إلى المصمم (بريد المستخدم الذي طلبه)
+      const to = `${DESIGNER_EMAIL_FINAL}`;
+      window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+  }
+
+  // ربط الأحداث العامة
+  ;['input','change'].forEach(ev=>{
+    ['fCompany','fSite','fDesc','fGateNo','fGateName','fDate','fAuditorName','fAuditorMail','fAuditorPhone','fClientMail','phaseSel']
+    .forEach(id=>{ const el = els[id]; el && el.addEventListener(ev, ()=>{ if(id==='phaseSel') updatePhaseHint(); persist(); }) })
+  });
+
+  els.exportHtml.onclick = exportHTML;
+  els.shareAction.onclick = shareByPhase;
+  els.printBtn.onclick = ()=> window.print();
+
+  // لصق نص فقط داخل خلايا البند
+  els.tbody.addEventListener('paste', e=>{
+    if(e.target.classList.contains('txt')){ e.preventDefault(); const text=(e.clipboardData||window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text); }
+  });
+
+  // تهيئة أولية
+  function seed(){ if(rows.length) return; ['* التأكد من نظافة الموقع','* فحص معدات الإطفاء','* تدريب العاملين على المخاطر','* سلامة التمديدات الكهربائية'].forEach(t=> addRow(t)); }
+  function init(){ restore(); if(!rows.length) seed(); render(); updatePhaseHint(); }
+  init();
 })();
 </script>
 </body>
