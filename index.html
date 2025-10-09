@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>دِزاينر – إعداد الباب وتوليد نسخة العميل (v2.6)</title>
+<title>دِزاينر – إعداد الباب وتوليد نسخة العميل (v2.7)</title>
 <style>
   :root{--bg:#f7f8fb;--ink:#111;--muted:#666;--line:#e5e7eb;--card:#fff;--accent:#2563eb;--head:#e6f0ff}
   *{box-sizing:border-box}
@@ -42,40 +42,50 @@
   <!-- لوحة المصمم -->
   <section id="designer" class="card">
     <div class="title">
-      <!-- شعار شركتك ثابت أعلى اليمين: ضع الملف بجانب هذا HTML بنفس الاسم -->
+      <!-- شعار شركتك (اختياري) -->
       <img id="brandFixed" class="logo" alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" style="margin-inline-start:auto">
-      <h1>دِزاينر – اختبار الباب وتحضير نسخة العميل</h1>
+      <h1 data-i18n="title.designer">دِزاينر – اختبار الباب وتحضير نسخة العميل</h1>
       <span style="margin-inline-start:auto"></span>
-      <button type="button" class="btn no-print" id="printSetup">🖨️ طباعة</button>
+      <div class="no-print" style="display:flex;gap:8px;align-items:center">
+        <label class="pill" style="display:flex;align-items:center;gap:6px" data-i18n="label.lang">اللغة</label>
+        <select id="langSel" class="no-print" style="width:auto">
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+        </select>
+        <button type="button" class="btn" id="printSetup">🖨️ <span data-i18n="btn.printSetup">طباعة</span></button>
+      </div>
     </div>
-    <div class="muted">أدخل بيانات العميل والموقع، اختر الباب والقالب، عدّل البنود وأنواع التقييم، ثم معاينة/تصدير نسخة العميل. الأرقام إنجليزية دائمًا.</div>
+    <div class="muted" data-i18n="subtitle">أدخل بيانات العميل والموقع، اختر الباب والقالب، عدّل البنود وأنواع التقييم، ثم معاينة/تصدير نسخة العميل. الأرقام إنجليزية دائمًا.</div>
     <div id="toast" class="hidden" style="margin-top:8px;padding:8px 12px;border:1px solid #c7d2fe;background:#eef2ff;border-radius:10px;color:#374151"></div>
 
     <div class="row" style="margin-top:10px">
-      <div class="col-4"><label>اسم الشركة<br><input id="dClient" type="text" placeholder="مثال: شركة الخليج"></label></div>
-      <div class="col-4"><label>اسم الموقع<br><input id="dSite" type="text" placeholder="مثال: مصنع الشعيبة"></label></div>
-      <div class="col-4"><label>وصف الموقع<br>
+      <div class="col-4"><label><span data-i18n="field.company">اسم الشركة</span><br><input id="dClient" type="text" placeholder="مثال: شركة الخليج"></label></div>
+      <div class="col-4"><label><span data-i18n="field.site">اسم الموقع</span><br><input id="dSite" type="text" placeholder="مثال: مصنع الشعيبة"></label></div>
+      <div class="col-4"><label><span data-i18n="field.desc">وصف الموقع</span><br>
         <div style="display:flex;gap:6px">
           <select id="dDescSel" style="flex:1">
             <option value="">— اختر وصفًا —</option>
-            <option>مكتب</option>
-            <option>ورشة</option>
-            <option>مصنع</option>
-            <option>مستودع</option>
-            <option>موقع خارجي</option>
-            <option value="__other">أخرى…</option>
+            <option data-i18n="desc.office">مكتب</option>
+            <option data-i18n="desc.workshop">ورشة</option>
+            <option data-i18n="desc.factory">مصنع</option>
+            <option data-i18n="desc.warehouse">مستودع</option>
+            <option data-i18n="desc.outdoor">موقع خارجي</option>
+            <option value="__other" data-i18n="desc.other">أخرى…</option>
           </select>
           <input id="dDescOther" type="text" placeholder="اكتب وصفًا" class="hidden" style="flex:1">
         </div>
       </label></div>
-      <div class="col-3"><label>رقم الباب<br><input id="gateNo" type="text" placeholder="1"></label></div>
-      <div class="col-5"><label>اسم الباب<br><input id="gateName" type="text" placeholder="مثال: الحماية من الآلات"></label></div>
-      <div class="col-4"><label>تاريخ الإصدار<br><input id="issueDate" type="date"></label></div>
-      <div class="col-6"><label class="btn no-print" style="display:inline-flex;align-items:center;gap:8px"><input type="file" id="logoInput" accept="image/*"> رفع شعار العميل</label></div>
+      <div class="col-3"><label><span data-i18n="field.gateNo">رقم الباب</span><br><input id="gateNo" type="text" placeholder="1"></label></div>
+      <div class="col-5"><label><span data-i18n="field.gateName">اسم الباب</span><br><input id="gateName" type="text" placeholder="مثال: الحماية من الآلات"></label></div>
+      <div class="col-4"><label><span data-i18n="field.issue">تاريخ الإصدار</span><br><input id="issueDate" type="date"></label></div>
+      <div class="col-6 no-print" style="display:flex;gap:8px;align-items:center">
+        <label class="btn" style="display:inline-flex;align-items:center;gap:8px"><input type="file" id="brandInput" accept="image/*"> <span data-i18n="upload.brand">رفع شعار المصمم</span></label>
+        <label class="btn" style="display:inline-flex;align-items:center;gap:8px"><input type="file" id="logoInput" accept="image/*"> <span data-i18n="upload.client">رفع شعار العميل</span></label>
+      </div>
     </div>
 
     <div class="toolbar no-print">
-      <span class="pill">📚 قوالب الأبواب السريعة:</span>
+      <span class="pill" data-i18n="label.quick">📚 قوالب الأبواب السريعة:</span>
       <button type="button" class="btn" data-tpl="ch1">باب 1</button>
       <button type="button" class="btn" data-tpl="ch2">باب 2</button>
       <button type="button" class="btn" data-tpl="ch3">باب 3</button>
@@ -86,36 +96,39 @@
       <button type="button" class="btn" data-tpl="ch8">باب 8</button>
       <button type="button" class="btn" data-tpl="ergo">Ergonomic</button>
       <span style="flex:1"></span>
-      <label class="pill"><input type="checkbox" id="optChecks" checked> ✔/✖ (افتراضي للبنود الجديدة)</label>
-      <label class="pill"><input type="checkbox" id="optRisk"> تقييم 1–5 (افتراضي للبنود الجديدة)</label>
+      <label class="pill"><input type="checkbox" id="optChecks" checked> <span data-i18n="opt.yesno">✔/✖ (افتراضي للبنود الجديدة)</span></label>
+      <label class="pill"><input type="checkbox" id="optRisk"> <span data-i18n="opt.scale">تقييم 1–5 (افتراضي للبنود الجديدة)</span></label>
     </div>
 
     <div class="toolbar no-print">
-      <button type="button" class="btn" id="addRow">➕ إضافة بند</button>
-      <button type="button" class="btn" id="selectAll">✔️ تحديد الكل</button>
-      <button type="button" class="btn" id="clearAll">❌ إلغاء التحديد</button>
-      <button type="button" class="btn" id="deleteExcluded">🗑️ حذف البنود غير المُضمّنة</button>
-      <button type="button" class="btn" id="saveDraft">💾 حفظ مسودة</button>
-      <button type="button" class="btn" id="reset">إعادة تعيين</button>
+      <button type="button" class="btn" id="addRow">➕ <span data-i18n="btn.add">إضافة بند</span></button>
+      <button type="button" class="btn" id="selectAll">✔️ <span data-i18n="btn.all">تحديد الكل</span></button>
+      <button type="button" class="btn" id="clearAll">❌ <span data-i18n="btn.none">إلغاء التحديد</span></button>
+      <button type="button" class="btn" id="deleteExcluded">🗑️ <span data-i18n="btn.delExcluded">حذف البنود غير المُضمّنة</span></button>
+      <button type="button" class="btn" id="saveDraft">💾 <span data-i18n="btn.save">حفظ مسودة</span></button>
+      <button type="button" class="btn" id="reset"><span data-i18n="btn.reset">إعادة تعيين</span></button>
       <span style="flex:1"></span>
-      <input id="filter" type="search" placeholder="فلترة البنود…" style="max-width:280px">
+      <input id="filter" type="search" placeholder="فلترة البنود…" style="max-width:280px" data-i18n-ph="ph.filter">
     </div>
 
     <table>
-      <thead><tr><th style="width:74px">تضمين</th><th>نص البند</th><th style="width:160px">نوع التقييم</th></tr></thead>
+      <thead><tr>
+        <th style="width:74px" data-i18n="th.include">تضمين</th>
+        <th data-i18n="th.item">نص البند</th>
+        <th style="width:160px" data-i18n="th.type">نوع التقييم</th>
+      </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
 
     <div class="toolbar no-print">
-      <button type="button" class="btn primary" id="preview">👁️ معاينة نسخة العميل (اختبار)</button>
-      <button type="button" class="btn" id="exportHtml">⬇️ تصدير HTML للعميل (أوفلاين)</button>
-      <button type="button" class="btn" id="makeLink">🌐 إنشاء رابط للعميل</button>
+      <button type="button" class="btn primary" id="preview">👁️ <span data-i18n="btn.preview">معاينة نسخة العميل (اختبار)</span></button>
+      <button type="button" class="btn" id="exportHtml">⬇️ <span data-i18n="btn.export">تصدير HTML للعميل (أوفلاين)</span></button>
+      <button type="button" class="btn" id="makeLink">🌐 <span data-i18n="btn.link">إنشاء رابط للعميل</span></button>
     </div>
     <div class="footer no-print">
       Ergonomic Industrial — <a href="https://ergonomicindustrial.com" target="_blank">ergonomicindustrial.com</a> — Email: <a href="mailto:ergonomicindustrial@gmail.com">ergonomicindustrial@gmail.com</a> — Phone/WhatsApp: 67756743
     </div>
 
-    <!-- اختبارات تلقائية -->
     <details class="tests no-print">
       <summary>✅ اختبارات سريعة</summary>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">
@@ -129,7 +142,7 @@
   <!-- معاينة/اختبار نسخة العميل -->
   <section id="client" class="card hidden">
     <div class="title" style="justify-content:center; position:relative">
-      <img alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" style="height:48px;position:absolute;inset-inline-end:0;top:0">
+      <img id="brandTop" alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" style="height:48px;position:absolute;inset-inline-end:0;top:0">
       <div style="flex:1;display:flex;justify-content:center;gap:8px;align-items:center">
         <img id="lg2" class="logo" alt="logo" hidden>
         <h1 id="titleTxt" style="margin:0">قائمة تدقيق السلامة – الباب</h1>
@@ -137,28 +150,28 @@
     </div>
 
     <div class="row">
-      <div class="col-4"><label>اسم الشركة<br><input id="cClient" type="text"></label></div>
-      <div class="col-4"><label>اسم الموقع<br><input id="cSite" type="text"></label></div>
-      <div class="col-4"><label>وصف الموقع<br><input id="cDesc" type="text" placeholder="مكتب / ورشة / …"></label></div>
-      <div class="col-4"><label>اسم المدقق<br><input id="cAuditor" type="text"></label></div>
-      <div class="col-4"><label>التاريخ<br><input id="cDate" type="date"></label></div>
+      <div class="col-4"><label data-i18n="field.company">اسم الشركة</label><br><input id="cClient" type="text"></div>
+      <div class="col-4"><label data-i18n="field.site">اسم الموقع</label><br><input id="cSite" type="text"></div>
+      <div class="col-4"><label data-i18n="field.desc">وصف الموقع</label><br><input id="cDesc" type="text" placeholder="مكتب / ورشة / …" data-i18n-ph="ph.desc"></div>
+      <div class="col-4"><label data-i18n="field.auditor">اسم المدقق</label><br><input id="cAuditor" type="text"></div>
+      <div class="col-4"><label data-i18n="field.date">التاريخ</label><br><input id="cDate" type="date"></div>
     </div>
 
     <table id="clientTable">
       <thead>
         <tr>
-          <th>م</th><th>البند</th><th>نوع</th><th colspan="2">حقل التقييم</th><th>ملاحظات (≤50)</th>
+          <th data-i18n="th.no">م</th><th data-i18n="th.item">البند</th><th data-i18n="th.type">نوع</th><th colspan="2" data-i18n="th.field">حقل التقييم</th><th data-i18n="th.note">ملاحظات (≤50)</th>
         </tr>
       </thead>
       <tbody id="clientBody"></tbody>
     </table>
 
     <div class="toolbar no-print sharebar">
-      <button type="button" class="btn" id="back">↩️ رجوع للتعديل</button>
+      <button type="button" class="btn" id="back">↩️ <span data-i18n="btn.back">رجوع للتعديل</span></button>
       <span style="flex:1"></span>
-      <button type="button" class="btn" id="sendWA">📤 إرسال واتساب</button>
-      <button type="button" class="btn" id="sendMail">📧 إرسال إيميل</button>
-      <button type="button" class="btn" id="printClient">🖨️ طباعة / PDF</button>
+      <button type="button" class="btn" id="sendWA">📤 <span data-i18n="btn.wa">إرسال واتساب</span></button>
+      <button type="button" class="btn" id="sendMail">📧 <span data-i18n="btn.mail">إرسال إيميل</span></button>
+      <button type="button" class="btn" id="printClient">🖨️ <span data-i18n="btn.print">طباعة / PDF</span></button>
     </div>
   </section>
 </div>
@@ -169,25 +182,89 @@
   const S = s=>document.querySelectorAll(s);
 
   // إعدادات الروابط (قالب فقط – الرفع يدوي)
-  const LINK_BASE = "https://alquraishi2013-gif.github.io/ergonomic-safety-audit-checklist"; // أو https://ergonomicindustrial.com/audits
-  const LINK_SUBDIR = "exports"; // يمكن "" لو بدون مجلد
+  const LINK_BASE = "https://alquraishi2013-gif.github.io/ergonomic-safety-audit-checklist";
+  const LINK_SUBDIR = "exports";
 
-  // العناصر
+  // i18n — عبارات أساسية فقط (يمكن التوسع لاحقًا)
+  const i18n = {
+    ar:{
+      dir:'rtl', lang:'ar',
+      'title.designer':'دِزاينر – اختبار الباب وتحضير نسخة العميل',
+      'subtitle':'أدخل بيانات العميل والموقع، اختر الباب والقالب، عدّل البنود وأنواع التقييم، ثم معاينة/تصدير نسخة العميل. الأرقام إنجليزية دائمًا.',
+      'label.lang':'اللغة',
+      'field.company':'اسم الشركة','field.site':'اسم الموقع','field.desc':'وصف الموقع','field.gateNo':'رقم الباب','field.gateName':'اسم الباب','field.issue':'تاريخ الإصدار','field.auditor':'اسم المدقق','field.date':'التاريخ',
+      'desc.office':'مكتب','desc.workshop':'ورشة','desc.factory':'مصنع','desc.warehouse':'مستودع','desc.outdoor':'موقع خارجي','desc.other':'أخرى…',
+      'upload.brand':'رفع شعار المصمم','upload.client':'رفع شعار العميل',
+      'label.quick':'قوالب الأبواب السريعة:',
+      'opt.yesno':'✔/✖ (افتراضي للبنود الجديدة)','opt.scale':'تقييم 1–5 (افتراضي للبنود الجديدة)',
+      'btn.printSetup':'طباعة','btn.add':'إضافة بند','btn.all':'تحديد الكل','btn.none':'إلغاء التحديد','btn.delExcluded':'حذف البنود غير المُضمّنة','btn.save':'حفظ مسودة','btn.reset':'إعادة تعيين','btn.preview':'معاينة نسخة العميل (اختبار)','btn.export':'تصدير HTML للعميل (أوفلاين)','btn.link':'إنشاء رابط للعميل','btn.back':'رجوع للتعديل','btn.wa':'إرسال واتساب','btn.mail':'إرسال إيميل','btn.print':'طباعة / PDF',
+      'th.include':'تضمين','th.item':'نص البند','th.type':'نوع التقييم','th.field':'حقل التقييم','th.note':'ملاحظات (≤50)','th.no':'م',
+      'ph.filter':'فلترة البنود…','ph.desc':'مكتب / ورشة / …',
+      clientTitle:(no,name)=>`قائمة تدقيق السلامة – الباب ${no||'-'} – ${name||''}`,
+      type:{yesno:'✔/✖',scale:'1–5',note:'ملاحظة'}
+    },
+    en:{
+      dir:'ltr', lang:'en',
+      'title.designer':'Designer – Gate Setup & Client Copy',
+      'subtitle':'Enter client and site data, choose the gate/template, edit items & rating types, then preview/export the client copy. Numbers are always LTR.',
+      'label.lang':'Language',
+      'field.company':'Company','field.site':'Site','field.desc':'Site description','field.gateNo':'Gate No.','field.gateName':'Gate Name','field.issue':'Issue date','field.auditor':'Auditor','field.date':'Date',
+      'desc.office':'Office','desc.workshop':'Workshop','desc.factory':'Factory','desc.warehouse':'Warehouse','desc.outdoor':'Outdoor','desc.other':'Other…',
+      'upload.brand':'Upload Designer Logo','upload.client':'Upload Client Logo',
+      'label.quick':'Quick gate templates:',
+      'opt.yesno':'✔/✖ (default for new items)','opt.scale':'Scale 1–5 (default for new items)',
+      'btn.printSetup':'Print','btn.add':'Add item','btn.all':'Select all','btn.none':'Clear selection','btn.delExcluded':'Delete excluded items','btn.save':'Save draft','btn.reset':'Reset','btn.preview':'Preview client copy (test)','btn.export':'Export client HTML (offline)','btn.link':'Create client link','btn.back':'Back to edit','btn.wa':'Send WhatsApp','btn.mail':'Send Email','btn.print':'Print / PDF',
+      'th.include':'Include','th.item':'Item text','th.type':'Rating type','th.field':'Evaluation field','th.note':'Notes (≤50)','th.no':'#',
+      'ph.filter':'Filter items…','ph.desc':'Office / Workshop / …',
+      clientTitle:(no,name)=>`Safety Audit – Gate ${no||'-'} – ${name||''}`,
+      type:{yesno:'✔/✖',scale:'1–5',note:'Note only'}
+    }
+  };
+
+  // قوالب الأبواب AR/EN
+  const templatesAR = {
+    ch1:["التأكد من وجود دليل إرشادي للسلامة مكتوب بالعربية ولغة يفهمها العمال","تحديد مخاطر العمل حسب طبيعة النشاط","تزويد الهيئة بالمخططات النهائية المعتمدة","إبلاغ وتدريب العمال على المخاطر والوقاية قبل مباشرة العمل","توفير معدات الوقاية الشخصية مجانًا وتدريب العمال على استخدامها","اعتماد لائحة جزاءات خاصة بمخالفات السلامة","وضع علامات إرشادية وتحذيرية واضحة وملصقات بلغة يفهمها العمال","تعيين مشرف/مراقب سلامة حسب حجم وخطورة المنشأة","تأهيل مشرف السلامة بشهادة وخبرة مناسبة","للمنشآت عالية الخطورة (300+ عامل): إنشاء قسم سلامة وصحة مهنية","تدريب دوري لمشرفي ومراقبي السلامة","إجراء تفتيش دوري وتسجيل الحوادث والإصابات","إخطار الهيئة بالحوادث الجسيمة خلال 24 ساعة","حفظ سجلات محدثة متاحة للمفتشين"],
+    ch2:["متانة المباني والأسقف","تجهيز ساحات العمل بمظلات/أسقف","ممرات واضحة ومخارج طوارئ آمنة","أرضيات سليمة ونظيفة وصرف مغطى","التخلص السليم من الفضلات والمواد الكيميائية","صيانة دورية للمباني والمرافق","وقاية من السقوط والأشياء المتساقطة والحفر","سلالم متينة غير زلقة ومزودة بحواجز","سقالات آمنة مع حواجز وتثبيت جيد","سندرات/منصات مرخصة وآمنة","عزل مصادر الغبار/الغازات مع شفط","فحص أوعية الضغط","أدوات صالحة ومحددة أماكنها","معدات إطفاء مناسبة وموزعة"],
+    ch3:["تدريب العمال على وقاية الآلات","لا تشغيل دون حواجز","عدم تعطيل أجهزة الوقاية","مسافة 60 سم حول الآلات","حواجز دائمة للأجزاء الخطرة","إزالة الحواجز فقط بعد الإيقاف","مفتاح إيقاف طارئ","صيانة دورية بسجلات","وقاية من الشرر والشظايا"],
+    ch4:["تداول المواد والخامات بطريقة آمنة لا تشكل خطراً على سلامة العاملين","استخدام معدات الرفع الميكانيكية المناسبة وصيانتها دورياً (تفتيش أسبوعي واختبار سنوي)","تثبيت لوحة تبين أقصى حمولة تشغيل مأمونة على كل آلة رفع","إعداد سجل خاص لكل آلة رفع يشمل بيانات الصنع، الحمل الأقصى، الفحص الدوري، الصيانة والإصلاحات","تزويد مشغّل آلة الرفع بوسيلة اتصال صالحة قبل بدء العمل","تحديد مسارات آلات الرفع بوسائل تحذير ومنع مرور الأشخاص أو وقوفهم تحت الأحمال المعلقة","تشغيل آلات الرفع والجر والنقل يقتصر على أشخاص مختصين ومؤهلين ومرخّصين","تأمين وسائل النقل الميكانيكية وإجراء فحص دوري لها وفقاً لمتطلبات السلامة","تخزين المواد والمعدات وفق أصول التخزين السليم، مع عزل المواد الخطرة في مخازن خاصة","وضع لافتات إرشادية على المخازن تبين درجة الخطورة وطرق التداول والنقل الآمن"],
+    ch5:["مفاتيح عزل آمنة وبأماكن ظاهرة","قواطع أوتوماتيكية للأعطال","لوحات توزيع في أماكن آمنة","عدم استخدام اللوحات للتخزين","عزل كامل للأسلاك والكابلات","فحص دوري ومعالجة فورية","عاملون مؤهلون","عزل التيار قبل الصيانة وتحذيرات","قفازات/أحذية عازلة ومنع المجوهرات","تأريض الستاتيك","معدات إطفاء حرائق كهربائية","فحوص طبية للعاملين بالكهرباء","لوحات تحذير واضحة"],
+    ch6:["إضاءة كافية ومتجانسة","الحد من الضوضاء/الاهتزازات","حرارة عمل ضمن الحدود","وقاية للعمال بالمواقع المكشوفة","تهوية كافية","حواجز حرارية للأفران واللحام"],
+    ch7:["حدود التعرض للمواد الكيميائية","شفط/تهوية عند المصدر","استبدال ببدائل أقل خطراً","تمكين المفتش من بيانات المواد","تنظيف رطب/شفط دوري"],
+    ch8:["أماكن راحة/طعام وفق اشتراطات","غرف تبديل وخزائن","حمامات ومواد تنظيف","مياه شرب مبردة كافية","عدد كافٍ من دورات المياه","صرف صحي ملائم للمواقع النائية"],
+    ergo:["ارتفاع الطاولة مناسب","كرسي قابل للتعديل بدعم أسفل الظهر","مسافة رؤية الشاشة موصى بها","مناولة يدوية ضمن الحدود"]
+  };
+  const templatesEN = {
+    ch1:["Provide a written safety manual in Arabic and a language workers understand","Identify work hazards according to activity","Submit approved final drawings to the Authority","Inform and train workers on hazards and prevention before work starts","Provide PPE free of charge and train workers on use","Adopt a sanctions schedule for safety violations","Post clear safety/warning signs in a language workers understand","Appoint a Safety Supervisor/Officer by size/risk","Qualify the Safety Supervisor with proper certificate/experience","High-risk sites (300+ workers): establish OHS department","Periodic training for safety staff","Conduct periodic inspections and record incidents","Notify the Authority of major accidents within 24h","Maintain updated records available to inspectors"],
+    ch2:["Sound buildings and roofs","Shaded/roofed work yards","Clear passages and safe exits","Good flooring, clean, covered drains","Proper disposal of waste and chemicals","Periodic maintenance of buildings/facilities","Protection from falls/falling objects/holes","Non-slip sturdy ladders with guardrails","Safe scaffolds with proper guardrails/anchorage","Licensed safe mezzanines/platforms","Enclose dust/gas sources with extraction","Inspect pressure vessels","Serviceable tools with assigned storage","Adequate fire-fighting equipment"] ,
+    ch3:["Train workers on machine guarding","No operation without guards","Do not bypass safety devices","60 cm clearance around machines","Fixed guards for hazardous parts","Remove guards only after shutdown","Emergency stop switch","Periodic maintenance with records","Protection from sparks/projectiles"],
+    ch4:["Safe handling of materials without endangering workers","Use proper lifting equipment; weekly inspection & annual test","Display SWL plate on each lifting machine","Keep logbook per lifting machine (data, SWL, inspections, maintenance)","Provide operator with working communication device","Define lifting routes with warnings; no standing under loads","Operate lifting/winching/transport by qualified licensed persons","Secure vehicles; periodic inspection per safety requirements","Store materials properly; segregate hazardous substances","Post storage signage with hazard class and handling rules"],
+    ch5:["Safe isolation switches in visible locations","Automatic breakers for faults","Distribution boards in safe accessible places","No storage inside distribution boards","Fully insulated cables rated for voltage","Periodic inspection and immediate repair","Qualified personnel only","Isolate power before maintenance; warnings posted","Insulating gloves/boots; no jewelry","Static grounding","Electrical fire-fighting equipment","Medical checks for electrical workers","Clear warning signs"],
+    ch6:["Adequate uniform lighting","Limit noise/vibration","Working temperature within limits","Protect outdoor workers","Adequate ventilation","Heat shields for furnaces/welding"],
+    ch7:["Exposure limits for chemicals","Source extraction/ventilation","Substitute with less hazardous alternatives","Provide inspectors material data","Wet cleaning/regular vacuuming"],
+    ch8:["Rest/meal rooms per requirements","Changing rooms & lockers","Washrooms & cleansing materials","Adequate cooled drinking water","Sufficient toilets","Proper sanitation for remote sites"],
+    ergo:["Proper desk height","Adjustable chair with lumbar support","Recommended screen viewing distance","Manual handling within limits"]
+  };
+
+  // خرائط أسماء الأبواب
+  const gateNameMapAR = { ch1:'الأحكام العامة', ch2:'المباني والمرافق', ch3:'الحماية من الآلات', ch4:'تداول ورفع وتخزين المواد', ch5:'السلامة الكهربائية', ch6:'بيئة العمل', ch7:'المواد الكيميائية', ch8:'المرافق العامة', ergo:'Ergonomic' };
+  const gateNameMapEN = { ch1:'General Provisions', ch2:'Buildings & Facilities', ch3:'Machine Guarding', ch4:'Materials Handling/Lifting/Storage', ch5:'Electrical Safety', ch6:'Work Environment', ch7:'Chemicals', ch8:'Amenities', ergo:'Ergonomic' };
+  const gateNoMap = { ch1:'1', ch2:'2', ch3:'3', ch4:'4', ch5:'5', ch6:'6', ch7:'7', ch8:'8' };
+  const numToGateKey = { '1':'ch1','2':'ch2','3':'ch3','4':'ch4','5':'ch5','6':'ch6','7':'ch7','8':'ch8' };
+
+  // عناصر
   const els = {
     designer: $('#designer'), client: $('#client'),
-    lg: $('#lg2'), logoInput: $('#logoInput'),
+    brandFixed: $('#brandFixed'), brandTop: $('#brandTop'), brandInput: $('#brandInput'), logoInput: $('#logoInput'),
+    lg: $('#lg2'), langSel: $('#langSel'),
     dClient: $('#dClient'), dSite: $('#dSite'), dDescSel: $('#dDescSel'), dDescOther: $('#dDescOther'),
     gateNo: $('#gateNo'), gateName: $('#gateName'), issueDate: $('#issueDate'),
     optChecks: $('#optChecks'), optRisk: $('#optRisk'),
     addRow: $('#addRow'), selectAll: $('#selectAll'), clearAll: $('#clearAll'), deleteExcluded: $('#deleteExcluded'), saveDraft: $('#saveDraft'), reset: $('#reset'),
     filter: $('#filter'), tbody: $('#tbody'),
     preview: $('#preview'), exportHtml: $('#exportHtml'), makeLink: $('#makeLink'), printSetup: $('#printSetup'),
-    // معاينة
     titleTxt: $('#titleTxt'), cClient: $('#cClient'), cSite: $('#cSite'), cDesc: $('#cDesc'), cAuditor: $('#cAuditor'), cDate: $('#cDate'),
     clientBody: $('#clientBody'), back: $('#back'), printClient: $('#printClient'),
-    // اختبارات
     btnRunTests: $('#btnRunTests'), testOut: $('#testOut'),
-    // إرسال
     sendWA: $('#sendWA'), sendMail: $('#sendMail')
   };
 
@@ -197,58 +274,34 @@
 
   // الحالة
   let clientLogoData = '';
+  let brandLogoData = '';
   let rows = []; // {id,text,include,type}
+  let lang = 'ar';
 
   // التخزين
-  const LS_KEY = 'designer_console_v2_6_types';
-
-  // قوالب الأبواب (كما هي)
-  const templates = {
-    ch1:[
-      "التأكد من وجود دليل إرشادي للسلامة مكتوب بالعربية ولغة يفهمها العمال",
-      "تحديد مخاطر العمل حسب طبيعة النشاط",
-      "تزويد الهيئة بالمخططات النهائية المعتمدة",
-      "إبلاغ وتدريب العمال على المخاطر والوقاية قبل مباشرة العمل",
-      "توفير معدات الوقاية الشخصية مجانًا وتدريب العمال على استخدامها",
-      "اعتماد لائحة جزاءات خاصة بمخالفات السلامة",
-      "وضع علامات إرشادية وتحذيرية واضحة وملصقات بلغة يفهمها العمال",
-      "تعيين مشرف/مراقب سلامة حسب حجم وخطورة المنشأة",
-      "تأهيل مشرف السلامة بشهادة وخبرة مناسبة",
-      "للمنشآت عالية الخطورة (300+ عامل): إنشاء قسم سلامة وصحة مهنية",
-      "تدريب دوري لمشرفي ومراقبي السلامة",
-      "إجراء تفتيش دوري وتسجيل الحوادث والإصابات",
-      "إخطار الهيئة بالحوادث الجسيمة خلال 24 ساعة",
-      "حفظ سجلات محدثة متاحة للمفتشين"
-    ],
-    ch2:["متانة المباني والأسقف","تجهيز ساحات العمل بمظلات/أسقف","ممرات واضحة ومخارج طوارئ آمنة","أرضيات سليمة ونظيفة وصرف مغطى","التخلص السليم من الفضلات والمواد الكيميائية","صيانة دورية للمباني والمرافق","وقاية من السقوط والأشياء المتساقطة والحفر","سلالم متينة غير زلقة ومزودة بحواجز","سقالات آمنة مع حواجز وتثبيت جيد","سندرات/منصات مرخصة وآمنة","عزل مصادر الغبار/الغازات مع شفط","فحص أوعية الضغط","أدوات صالحة ومحددة أماكنها","معدات إطفاء مناسبة وموزعة"],
-    ch3:["تدريب العمال على وقاية الآلات","لا تشغيل دون حواجز","عدم تعطيل أجهزة الوقاية","مسافة 60 سم حول الآلات","حواجز دائمة للأجزاء الخطرة","إزالة الحواجز فقط بعد الإيقاف","مفتاح إيقاف طارئ","صيانة دورية بسجلات","وقاية من الشرر والشظايا"],
-    ch4:[
-      "تداول المواد والخامات بطريقة آمنة لا تشكل خطراً على سلامة العاملين",
-      "استخدام معدات الرفع الميكانيكية المناسبة وصيانتها دورياً (تفتيش أسبوعي واختبار سنوي)",
-      "تثبيت لوحة تبين أقصى حمولة تشغيل مأمونة على كل آلة رفع",
-      "إعداد سجل خاص لكل آلة رفع يشمل بيانات الصنع، الحمل الأقصى، الفحص الدوري، الصيانة والإصلاحات",
-      "تزويد مشغّل آلة الرفع بوسيلة اتصال صالحة قبل بدء العمل",
-      "تحديد مسارات آلات الرفع بوسائل تحذير ومنع مرور الأشخاص أو وقوفهم تحت الأحمال المعلقة",
-      "تشغيل آلات الرفع والجر والنقل يقتصر على أشخاص مختصين ومؤهلين ومرخّصين",
-      "تأمين وسائل النقل الميكانيكية وإجراء فحص دوري لها وفقاً لمتطلبات السلامة",
-      "تخزين المواد والمعدات وفق أصول التخزين السليم، مع عزل المواد الخطرة في مخازن خاصة",
-      "وضع لافتات إرشادية على المخازن تبين درجة الخطورة وطرق التداول والنقل الآمن"
-    ],
-    ch5:["مفاتيح عزل آمنة وبأماكن ظاهرة","قواطع أوتوماتيكية للأعطال","لوحات توزيع في أماكن آمنة","عدم استخدام اللوحات للتخزين","عزل كامل للأسلاك والكابلات","فحص دوري ومعالجة فورية","عاملون مؤهلون","عزل التيار قبل الصيانة وتحذيرات","قفازات/أحذية عازلة ومنع المجوهرات","تأريض الستاتيك","معدات إطفاء حرائق كهربائية","فحوص طبية للعاملين بالكهرباء","لوحات تحذير واضحة"],
-    ch6:["إضاءة كافية ومتجانسة","الحد من الضوضاء/الاهتزازات","حرارة عمل ضمن الحدود","وقاية للعمال بالمواقع المكشوفة","تهوية كافية","حواجز حرارية للأفران واللحام"],
-    ch7:["حدود التعرض للمواد الكيميائية","شفط/تهوية عند المصدر","استبدال ببدائل أقل خطراً","تمكين المفتش من بيانات المواد","تنظيف رطب/شفط دوري"],
-    ch8:["أماكن راحة/طعام وفق اشتراطات","غرف تبديل وخزائن","حمامات ومواد تنظيف","مياه شرب مبردة كافية","عدد كافٍ من دورات المياه","صرف صحي ملائم للمواقع النائية"],
-    ergo:["ارتفاع الطاولة مناسب","كرسي قابل للتعديل بدعم أسفل الظهر","مسافة رؤية الشاشة موصى بها","مناولة يدوية ضمن الحدود"]
-  };
+  const LS_KEY = 'designer_console_v2_7_types';
 
   function uid(){return Math.random().toString(36).slice(2)}
   function escapeHtml(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])) }
   function toast(msg){ const t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),1800) }
 
+  // i18n helpers
+  function applyI18n(){
+    const dict = i18n[lang];
+    document.documentElement.setAttribute('lang', dict.lang);
+    document.documentElement.setAttribute('dir', dict.dir);
+    S('[data-i18n]').forEach(el=>{ const k=el.getAttribute('data-i18n'); if(dict[k]) el.textContent = dict[k]; });
+    S('[data-i18n-ph]').forEach(el=>{ const k=el.getAttribute('data-i18n-ph'); if(dict[k]) el.setAttribute('placeholder', dict[k]); });
+    // تحديث عنوان المعاينة إذا كان ظاهرًا
+    if(!els.client.classList.contains('hidden')){
+      els.titleTxt.textContent = dict.clientTitle(els.gateNo.value, els.gateName.value);
+    }
+  }
+
   // حفظ/استرجاع
   function persist(){
     const payload = {
-      clientLogoData, rows,
+      clientLogoData, brandLogoData, rows, lang,
       dClient: els.dClient.value, dSite: els.dSite.value,
       descSel: els.dDescSel.value, descOther: els.dDescOther.value,
       gateNo: els.gateNo.value, gateName: els.gateName.value, issue: els.issueDate.value,
@@ -260,21 +313,28 @@
     const raw = localStorage.getItem(LS_KEY); if(!raw) return;
     try{
       const d = JSON.parse(raw);
-      clientLogoData = d.clientLogoData||'';
+      clientLogoData = d.clientLogoData||''; brandLogoData = d.brandLogoData||'';
       rows = Array.isArray(d.rows)? d.rows.map(x=>({id:x.id,text:x.text,include:!!x.include,type:x.type||'yesno'})) : [];
       els.dClient.value = d.dClient||''; els.dSite.value=d.dSite||'';
       els.dDescSel.value = d.descSel||''; els.dDescOther.value = d.descOther||'';
       if(els.dDescSel.value==='__other'){ els.dDescOther.classList.remove('hidden') }
       els.gateNo.value=d.gateNo||''; els.gateName.value=d.gateName||''; els.issueDate.value=d.issue||today;
       if(d.opts){ els.optChecks.checked=!!d.opts.checks; els.optRisk.checked=!!d.opts.risk }
-      renderSetup();
+      lang = d.lang||'ar'; els.langSel.value = lang;
+      renderSetup(); applyI18n();
+      // عرض شعاريْن إن وُجدا
+      if(brandLogoData){ els.brandFixed.src = brandLogoData; els.brandTop.src = brandLogoData; }
     }catch(e){ console.warn('restore failed', e) }
   }
 
-  // شعار العميل (أسفل نسخة العميل)
+  // رفع الشعارين
   els.logoInput.addEventListener('change', e=>{
     const f=e.target.files[0]; if(!f){clientLogoData=''; persist(); return}
-    const rd=new FileReader(); rd.onload=ev=>{ clientLogoData=ev.target.result; persist(); toast('تم رفع شعار العميل (سيظهر في أسفل النسخة)') }; rd.readAsDataURL(f)
+    const rd=new FileReader(); rd.onload=ev=>{ clientLogoData=ev.target.result; persist(); toast(lang==='ar'? 'تم رفع شعار العميل (سيظهر في أسفل النسخة)':'Client logo uploaded (will appear at bottom)') }; rd.readAsDataURL(f)
+  })
+  els.brandInput.addEventListener('change', e=>{
+    const f=e.target.files[0]; if(!f){brandLogoData=''; persist(); return}
+    const rd=new FileReader(); rd.onload=ev=>{ brandLogoData=ev.target.result; els.brandFixed.src = brandLogoData; els.brandTop.src = brandLogoData; persist(); toast(lang==='ar'? 'تم رفع شعار المصمم':'Designer logo uploaded') }; rd.readAsDataURL(f)
   })
 
   // إدارة البنود
@@ -283,10 +343,10 @@
     if(!els.optRisk.checked && !els.optChecks.checked) return 'note';
     return 'yesno';
   }
-  function addRow(text){ rows.push({id:uid(), text:(text||'* بند جديد'), include:true, type: defaultType()}); renderSetup(); persist() }
+  function addRow(text){ rows.push({id:uid(), text:(text|| (lang==='ar'? '* بند جديد':'* New Item')), include:true, type: defaultType()}); renderSetup(); persist() }
 
   function renderSetup(){
-    const q = els.filter.value.trim().toLowerCase();
+    const q = (els.filter.value||'').trim().toLowerCase();
     els.tbody.innerHTML='';
     rows.forEach(r=>{
       if(q && !String(r.text||'').toLowerCase().includes(q)) return;
@@ -295,9 +355,9 @@
                     <td contenteditable class="txt" data-id="${r.id}">${escapeHtml(r.text||'')}</td>
                     <td style="text-align:center">
                       <select class="typeSel" data-id="${r.id}">
-                        <option value="yesno" ${r.type==='yesno'?'selected':''}>✔/✖</option>
-                        <option value="scale" ${r.type==='scale'?'selected':''}>1–5</option>
-                        <option value="note" ${r.type==='note'?'selected':''}>ملاحظة فقط</option>
+                        <option value="yesno" ${r.type==='yesno'? 'selected':''}>${i18n[lang].type.yesno}</option>
+                        <option value="scale" ${r.type==='scale'? 'selected':''}>${i18n[lang].type.scale}</option>
+                        <option value="note" ${r.type==='note'? 'selected':''}>${i18n[lang].type.note}</option>
                       </select>
                     </td>`;
       els.tbody.appendChild(tr);
@@ -308,7 +368,7 @@
   els.addRow.onclick=()=>addRow();
   els.selectAll.onclick=()=>{ rows.forEach(r=>r.include=true); renderSetup(); persist() };
   els.clearAll.onclick=()=>{ rows.forEach(r=>r.include=false); renderSetup(); persist() };
-  els.deleteExcluded.onclick=()=>{ if(confirm('سيتم حذف جميع البنود غير المُضمّنة. متابعة؟')){ rows = rows.filter(r=>r.include); renderSetup(); persist(); toast('تم حذف البنود غير المُضمّنة') } };
+  els.deleteExcluded.onclick=()=>{ if(confirm(lang==='ar'? 'سيتم حذف جميع البنود غير المُضمّنة. متابعة؟':'Delete all excluded items?')){ rows = rows.filter(r=>r.include); renderSetup(); persist(); toast(lang==='ar'? 'تم حذف البنود غير المُضمّنة':'Excluded items deleted') } };
   els.tbody.addEventListener('input', e=>{ if(e.target.classList.contains('txt')){ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.text=e.target.innerText.trim(); persist() } } })
   els.tbody.addEventListener('change', e=>{
     if(e.target.classList.contains('pick')){ const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.include=e.target.checked; persist() } }
@@ -316,18 +376,25 @@
   })
   els.filter.addEventListener('input', renderSetup)
 
-  // تحميل القوالب
+  // تحميل القوالب بحسب اللغة
   function applyTemplate(key){
-    const arr = templates[key]||[]; if(!arr.length){ alert('لا توجد بنود لهذا الباب'); return; }
-    const replace = confirm('استبدال القائمة الحالية بالقالب؟\nOK = استبدال\nCancel = إضافة');
+    const pool = (lang==='ar'? templatesAR : templatesEN);
+    const nameMap = (lang==='ar'? gateNameMapAR : gateNameMapEN);
+    const arr = pool[key]||[]; if(!arr.length){ alert(lang==='ar'? 'لا توجد بنود لهذا الباب':'No items for this gate'); return; }
+    const replace = confirm(lang==='ar'? 'استبدال القائمة الحالية بالقالب؟\nOK = استبدال\nCancel = إضافة' : 'Replace current list with template?\nOK = Replace\nCancel = Append');
     els.filter.value='';
     if(replace){ rows = [] }
     arr.forEach(t=> rows.push({id:uid(), text:t, include:true, type: defaultType()}));
-    if(!els.gateName.value){ const nameMap={ch1:'الأحكام العامة', ch2:'المباني والمرافق', ch3:'الحماية من الآلات', ch4:'تداول ورفع وتخزين المواد', ch5:'السلامة الكهربائية', ch6:'بيئة العمل', ch7:'المواد الكيميائية', ch8:'المرافق العامة', ergo:'Ergonomic'}; els.gateName.value = nameMap[key]||'' }
-    if(!els.gateNo.value){ const noMap={ch1:'1',ch2:'2',ch3:'3',ch4:'4',ch5:'5',ch6:'6',ch7:'7',ch8:'8'}; els.gateNo.value = noMap[key]||els.gateNo.value }
+    // تعبئة رقم واسم الباب تلقائيًا دائمًا
+    els.gateNo.value = gateNoMap[key] || els.gateNo.value;
+    els.gateName.value = nameMap[key] || '';
     renderSetup(); persist();
     document.getElementById('tbody').scrollIntoView({behavior:'smooth', block:'start'});
-    toast(`تم تحميل ${arr.length} بندًا من ${key.toUpperCase()}`)
+    toast((lang==='ar'? 'تم تحميل ':'Loaded ')+arr.length+(lang==='ar'? ' بندًا من ':' items from ')+ key.toUpperCase())
+    // تحديث العنوان المترجم إن كنا في المعاينة
+    if(!els.client.classList.contains('hidden')){
+      els.titleTxt.textContent = i18n[lang].clientTitle(els.gateNo.value, els.gateName.value);
+    }
   }
   S('[data-tpl]').forEach(btn=>{ btn.addEventListener('click',()=> applyTemplate(btn.getAttribute('data-tpl')) ) });
 
@@ -339,24 +406,24 @@
   });
 
   // حفظ/إعادة تعيين/طباعة
-  els.saveDraft.onclick=()=>{ persist(); alert('تم حفظ المسودة محليًا') };
-  els.reset.onclick=()=>{ if(confirm('مسح كل البيانات؟')){ localStorage.removeItem(LS_KEY); rows=[]; clientLogoData=''; renderSetup(); els.dClient.value=els.dSite.value=els.gateNo.value=els.gateName.value=''; els.dDescSel.value=''; els.dDescOther.value=''; persist() } };
+  els.saveDraft.onclick=()=>{ persist(); alert(lang==='ar'? 'تم حفظ المسودة محليًا':'Draft saved locally') };
+  els.reset.onclick=()=>{ if(confirm(lang==='ar'? 'مسح كل البيانات؟':'Clear all data?')){ localStorage.removeItem(LS_KEY); rows=[]; clientLogoData=''; brandLogoData=''; renderSetup(); els.dClient.value=els.dSite.value=els.gateNo.value=els.gateName.value=''; els.dDescSel.value=''; els.dDescOther.value=''; persist() } };
   els.printSetup.onclick=()=>{ window.print() };
 
   // معاينة نسخة العميل
   els.preview.onclick=()=>{
     let list = rows.filter(r=>r.include && String(r.text||'').trim());
     if(!list.length && rows.length){ rows.forEach(r=>r.include=true); renderSetup(); persist(); list = rows.slice() }
-    if(!list.length){ alert('اختر بندًا واحدًا على الأقل'); return }
+    if(!list.length){ alert(lang==='ar'? 'اختر بندًا واحدًا على الأقل':'Select at least one item'); return }
 
-    els.titleTxt.textContent = `قائمة تدقيق السلامة – الباب ${els.gateNo.value||'-'} – ${els.gateName.value||''}`;
+    els.titleTxt.textContent = i18n[lang].clientTitle(els.gateNo.value, els.gateName.value);
     els.cClient.value = els.dClient.value; els.cSite.value = els.dSite.value;
     const desc = (els.dDescSel.value==='__other'? els.dDescOther.value : els.dDescSel.value) || '';
     els.cDesc.value = desc; document.getElementById('clientBody').innerHTML='';
 
     list.forEach((r,i)=>{
       const type = r.type||'yesno';
-      let typeTxt = type==='yesno'? '✔/✖' : (type==='scale'? '1–5' : 'ملاحظة');
+      let typeTxt = i18n[lang].type[type];
       let control = '';
       if(type==='yesno'){
         control = `<label style="margin-inline:6px"><input type="radio" name="r${i}" value="ok"> ✔</label>
@@ -371,21 +438,23 @@
                       <td>${escapeHtml(r.text)}</td>
                       <td style="text-align:center">${typeTxt}</td>
                       <td colspan="2" style="text-align:center">${control}</td>
-                      <td><input type="text" maxlength="50" placeholder="حتى 50 حرفًا"></td>`;
+                      <td><input type="text" maxlength="50" placeholder="${lang==='ar'?'حتى 50 حرفًا':'Up to 50 chars'}"></td>`;
       els.clientBody.appendChild(tr)
     })
 
-    // شعار العميل في المعاينة
+    // الشِعارات
     if(clientLogoData){ els.lg.src=clientLogoData; els.lg.hidden=false } else { els.lg.hidden=true }
+    if(brandLogoData){ els.brandTop.src = brandLogoData }
 
     els.designer.classList.add('hidden'); els.client.classList.remove('hidden')
   }
 
-  // مولّد HTML النهائي حسب الأنواع + شعار/فوتر
+  // HTML نهائي
   function buildClientHTMLByTypes(list, meta){
+    const dict = i18n[lang];
     const rowsHtml = list.map((r,i)=>{
       const type = r.type||'yesno';
-      let typeTxt = type==='yesno'? '✔/✖' : (type==='scale'? '1–5' : 'ملاحظة');
+      let typeTxt = dict.type[type];
       let control = '';
       if(type==='yesno'){
         control = '<td style="text-align:center">☐ ✔</td><td style="text-align:center">☐ ✖</td>';
@@ -398,27 +467,28 @@
     }).join('');
 
     const clientLogo = clientLogoData? `<div style="text-align:center;margin-top:14px"><img src="${clientLogoData}" style="height:56px;object-fit:contain"></div>`:'';
-    const brandTop = `<div style="text-align:end"><img alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" style="height:50px"></div>`;
+    const brandTop = `<div style="text-align:end"><img alt="Ergonomic Industrial" src="${brandLogoData||'Arkonomic Industrial Safety-0411.png'}" style="height:50px"></div>`;
     const footer = `<div style="margin-top:14px;padding:10px 12px;border-top:1px solid #e5e7eb;color:#334155;font-size:12px;text-align:center">
       <div>Ergonomic Industrial — <a href="https://ergonomicindustrial.com" target="_blank">ergonomicindustrial.com</a></div>
       <div>Email: <a href="mailto:ergonomicindustrial@gmail.com">ergonomicindustrial@gmail.com</a> | Phone/WhatsApp: 67756743</div>
       ${clientLogo}
     </div>`;
 
-    return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>نسخة العميل</title>
+    const htmlLang = dict.lang; const htmlDir = dict.dir;
+    return `<!doctype html><html lang="${htmlLang}" dir="${htmlDir}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${dict.clientTitle(meta.gateNo, meta.gateName)}</title>
 <style>body{font-family:Tahoma,Arial;margin:0;background:#f7f8fb;color:#111;font-variant-numeric:lining-nums tabular-nums} .wrap{max-width:900px;margin:auto;padding:16px} .card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px} h2{text-align:center;margin:.2rem 0 .6rem} table{width:100%;border-collapse:collapse;margin-top:10px} th,td{border:1px solid #ccc;padding:8px;vertical-align:middle} th{background:#e6f0ff;text-align:center} a{color:#2563eb}</style></head>
 <body><div class="wrap"><div class="card">${brandTop}
-<h2>قائمة تدقيق السلامة – الباب ${escapeHtml(meta.gateNo||'-')} – ${escapeHtml(meta.gateName||'')}</h2>
-<div style="margin:6px 0 10px;color:#333">الشركة: ${escapeHtml(meta.client||'-')} | الموقع: ${escapeHtml(meta.site||'-')} | الوصف: ${escapeHtml(meta.desc||'-')} | الإصدار: ${escapeHtml(meta.issue||'-')}</div>
-<table><thead><tr><th>م</th><th>البند</th><th>نوع</th><th colspan="2">حقل التقييم</th><th>ملاحظات</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+<h2>${dict.clientTitle(escapeHtml(meta.gateNo||'-'), escapeHtml(meta.gateName||''))}</h2>
+<div style="margin:6px 0 10px;color:#333">${dict['field.company']}: ${escapeHtml(meta.client||'-')} | ${dict['field.site']}: ${escapeHtml(meta.site||'-')} | ${dict['field.desc']}: ${escapeHtml(meta.desc||'-')} | ${dict['field.issue']||'Issue'}: ${escapeHtml(meta.issue||'-')}</div>
+<table><thead><tr><th>${dict['th.no']}</th><th>${dict['th.item']}</th><th>${dict['th.type']}</th><th colspan="2">${dict['th.field']}</th><th>${dict['th.note']}</th></tr></thead><tbody>${rowsHtml}</tbody></table>
 ${footer}
 </div></div></body></html>`;
   }
 
-  // تصدير HTML للعميل (أوفلاين)
+  // تصدير HTML
   els.exportHtml.onclick=()=>{
     const list = rows.filter(r=>r.include && String(r.text||'').trim());
-    if(!list.length){ alert('اختر بندًا واحدًا على الأقل'); return }
+    if(!list.length){ alert(lang==='ar'? 'اختر بندًا واحدًا على الأقل':'Select at least one item'); return }
     const desc = (els.dDescSel.value==='__other'? els.dDescOther.value : els.dDescSel.value) || '';
     const meta = { gateNo: els.gateNo.value, gateName: els.gateName.value, client: els.dClient.value, site: els.dSite.value, desc, issue: els.issueDate.value };
     const html = buildClientHTMLByTypes(list, meta);
@@ -432,24 +502,24 @@ ${footer}
     return parts.filter(Boolean).join('_');
   }
 
-  // إنشاء رابط للعميل (قالب)
+  // إنشاء رابط (قالب)
   els.makeLink.onclick=()=>{
-    const fname = prompt('اسم الملف (بدون مسافات وبدون امتداد .html):', suggestFileName()) || suggestFileName();
+    const fname = prompt(lang==='ar'? 'اسم الملف (بدون مسافات وبدون امتداد .html):':'File name (no spaces, without .html):', suggestFileName()) || suggestFileName();
     const base = LINK_BASE.replace(/\/$/,'');
     const sub = LINK_SUBDIR? '/'+LINK_SUBDIR.replace(/^\//,'') : '';
     const url = `${base}${sub}/${fname}.html`;
     navigator.clipboard && navigator.clipboard.writeText(url).catch(()=>{});
-    toast('تم إنشاء الرابط (نُسخ للحافظة). تذكير: ارفع الملف يدويًا لنفس المسار ليعمل الرابط.')
-    alert('رابط العميل:\n'+url+'\n\n* تذكير: ارفع ملف HTML إلى نفس المسار على GitHub Pages أو موقعك.')
+    toast(lang==='ar'? 'تم إنشاء الرابط (نُسخ للحافظة). تذكير: ارفع الملف يدويًا لنفس المسار ليعمل الرابط.' : 'Link created and copied. Reminder: upload the HTML to the same path.');
+    alert((lang==='ar'? 'رابط العميل:\n':'Client link:\n')+url+"\n\n"+(lang==='ar'? '* تذكير: ارفع ملف HTML إلى نفس المسار على GitHub Pages أو موقعك.':'* Reminder: upload the HTML file to the same path.'))
   }
 
   // العودة والطباعة
   els.back.onclick=()=>{ els.client.classList.add('hidden'); els.designer.classList.remove('hidden') }
   els.printClient.onclick=()=>window.print()
 
-  // إرسال واتساب/إيميل (مشاركة)
+  // مشاركة
   function buildShareText(){
-    const title = els.titleTxt.textContent || 'قائمة تدقيق السلامة';
+    const title = els.titleTxt.textContent || (lang==='ar'? 'قائمة تدقيق السلامة':'Safety Audit');
     const company = els.cClient.value||els.dClient.value||'-';
     const site = els.cSite.value||els.dSite.value||'-';
     const g = (els.gateNo.value||'-')+ ' – ' + (els.gateName.value||'');
@@ -458,39 +528,40 @@ ${footer}
     const base = LINK_BASE.replace(/\/$/,'');
     const sub = LINK_SUBDIR? '/'+LINK_SUBDIR.replace(/^\//,'') : '';
     const maybeURL = `${base}${sub}/${fname}`;
-    const body = `العنوان: ${title}\nالشركة: ${company}\nالموقع: ${site}\nالباب: ${g}\nالتاريخ: ${date}\n\n📎 اسم الملف المقترح: ${fname}\n🔗 رابط (إن تم رفع الملف): ${maybeURL}`;
-    return {subject: `${company} | ${g} | ${date}`, body}
+    const body = (lang==='ar'?
+      `العنوان: ${title}\nالشركة: ${company}\nالموقع: ${site}\nالباب: ${g}\nالتاريخ: ${date}\n\n📎 اسم الملف المقترح: ${fname}\n🔗 رابط (إن تم رفع الملف): ${maybeURL}` :
+      `Title: ${title}\nCompany: ${company}\nSite: ${site}\nGate: ${g}\nDate: ${date}\n\n📎 Suggested filename: ${fname}\n🔗 Link (if uploaded): ${maybeURL}`);
+    const subject = (lang==='ar'? `${company} | ${g} | ${date}` : `${company} | ${g} | ${date}`);
+    return {subject, body}
   }
-  els.sendWA.onclick=()=>{
-    const {body}=buildShareText();
-    const url = 'https://wa.me/?text='+encodeURIComponent(body);
-    window.open(url,'_blank')
-  }
-  els.sendMail.onclick=()=>{
-    const {subject, body}=buildShareText();
-    const href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`${body}\n\n* الرجاء إرفاق ملف HTML المصدَّر في الرسالة.`)}`;
-    window.location.href = href;
-  }
+  els.sendWA.onclick=()=>{ const {body}=buildShareText(); const url = 'https://wa.me/?text='+encodeURIComponent(body); window.open(url,'_blank') }
+  els.sendMail.onclick=()=>{ const {subject, body}=buildShareText(); const href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`${body}\n\n* ${lang==='ar'? 'الرجاء إرفاق ملف HTML المصدَّر في الرسالة.':'Please attach the exported HTML file.'}`)}`; window.location.href = href; }
+
+  // لغة
+  els.langSel.addEventListener('change', ()=>{
+    lang = els.langSel.value; applyI18n(); renderSetup(); persist();
+  });
+
+  // اسم الباب تلقائيًا عند كتابة رقم الباب يدويًا
+  els.gateNo.addEventListener('input', ()=>{
+    const key = numToGateKey[String(els.gateNo.value||'').trim()];
+    if(key){ const nameMap = (lang==='ar'? gateNameMapAR : gateNameMapEN); els.gateName.value = nameMap[key]||''; }
+  });
 
   // تزامن عام
   ;['input','change'].forEach(ev=>{ ['dClient','dSite','gateNo','gateName','issueDate','optChecks','optRisk','dDescSel','dDescOther'].forEach(id=>{ const el=els[id]; if(el) el.addEventListener(ev, persist) }) })
 
-  // اختبارات – إضافة دون حذف القديم
+  // اختبارات (تبقى كما هي)
   els.btnRunTests && els.btnRunTests.addEventListener('click',()=>{
     const logs=[]; const ok=(name,cond)=>logs.push((cond?'✅ ':'❌ ')+name+(cond?'':' (فشل)'));
-
     const before=rows.length; applyTemplate('ch1'); const after=rows.length; ok('تحميل قالب باب 1 يضيف عناصر', after>before);
-
     els.preview.click(); ok('تبديل إلى وضع العميل', !els.client.classList.contains('hidden'));
-    ok('العنوان يحتوي رقم/اسم الباب', /قائمة تدقيق السلامة/.test(els.titleTxt.textContent));
-
+    ok('العنوان يحتوي رقم/اسم الباب', /Gate|قائمة تدقيق/.test(els.titleTxt.textContent));
     const htmlNew = buildClientHTMLByTypes([{text:'بند yes/no',type:'yesno'},{text:'بند scale',type:'scale'},{text:'بند note',type:'note'}], {gateNo:'2',gateName:'اختبار2',client:'C',site:'S',desc:'D',issue:'2025-01-02'});
     ok('buildClientHTMLByTypes يحتوي <!doctype html>', /^<!doctype html>/i.test(htmlNew));
     ok('الفوتر يحتوي بيانات التواصل الصحيحة', /ergonomicindustrial\.com/.test(htmlNew) && /ergonomicindustrial@gmail\.com/.test(htmlNew) && /67756743/.test(htmlNew));
-
     ok('عدد #lg2 واحد فقط', document.querySelectorAll('#lg2').length===1);
     ok('عدد #titleTxt واحد فقط', document.querySelectorAll('#titleTxt').length===1);
-
     const {subject, body}= (function(){
       const title = els.titleTxt.textContent || 'قائمة تدقيق السلامة';
       const company = els.cClient.value||els.dClient.value||'-';
@@ -502,16 +573,14 @@ ${footer}
     const href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`${body}\n\n* الرجاء إرفاق ملف HTML المصدَّر في الرسالة.`)}`;
     ok('mailto يبدأ بصيغة صحيحة', /^mailto:\?subject=/.test(href));
     ok('لا يحتوي href على محارف \\n الخام', !/\n/.test(href));
-
     const htmlScale = buildClientHTMLByTypes([{text:'تقييم مقياس',type:'scale'}], {gateNo:'3',gateName:'اختبار3',client:'A',site:'B',desc:'C',issue:'2025-01-03'});
     ok('عمود المقياس يظهر كسلسلة 1 2 3 4 5', /1\s2\s3\s4\s5/.test(htmlScale));
-
     document.getElementById('testOut').textContent = logs.join('\n');
   })
 
   function seed(){ if(rows.length) return; ['التأكد من وجود دليل إرشادي للسلامة','تحديد مخاطر العمل','توفير معدات الوقاية الشخصية','فحص معدات الإطفاء وصلاحيتها'].forEach(t=>addRow(t)) }
-  restore(); seed();
-})()
+  restore(); seed(); applyI18n();
+})();
 </script>
 </body>
 </html>
