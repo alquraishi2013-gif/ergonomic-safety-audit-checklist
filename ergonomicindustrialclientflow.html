@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>نسخة العميل – إرسال وتدقيق وإعادة الإرسال (v3.0)</title>
+<title>نسخة العميل – إرسال وتدقيق وإعادة الإرسال (v3.1)</title>
 <style>
   :root{--bg:#f7f8fb;--ink:#111;--muted:#555;--line:#e5e7eb;--card:#fff;--accent:#2563eb;--head:#e6f0ff}
   *{box-sizing:border-box}
@@ -38,7 +38,8 @@
 <div class="wrap">
   <section id="clientApp" class="card">
     <div class="title" style="gap:14px;align-items:center">
-      <img id="brandTop" alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" class="logo">
+      <!-- Use a logo with a safe filename (no spaces/case issues) -->
+      <img id="brandTop" alt="Ergonomic Industrial" src="brand.png" class="logo">
       <h1>نسخة العميل – إرسال وتدقيق وإعادة الإرسال</h1>
       <span style="margin-inline-start:auto"></span>
       <div class="no-print" style="display:flex;gap:8px;align-items:center">
@@ -105,8 +106,6 @@
 <script>
 (function(){
   const $ = s=>document.querySelector(s);
-  const S = s=>document.querySelectorAll(s);
-
   const els = {
     tbody: $('#tbody'), addRow: $('#addRow'), clearRows: $('#clearRows'),
     exportHtml: $('#exportHtml'), copySummary: $('#copySummary'), shareAction: $('#shareAction'),
@@ -115,28 +114,41 @@
     fAuditorName: $('#fAuditorName'), fAuditorMail: $('#fAuditorMail'), fAuditorPhone: $('#fAuditorPhone'), fClientMail: $('#fClientMail')
   };
 
-  const DESIGNER_EMAIL_FINAL = 'ergomomicindustrial@gmail.com'; // طلب المستخدم النهائي
-  const LS_KEY = 'client_flow_v3_0';
-  let rows = []; // {id,text,type,sel}
+  // ✅ fixed email typo
+  const DESIGNER_EMAIL_FINAL = 'ergonomicindustrial@gmail.com';
+
+  const LS_KEY = 'client_flow_v3_1';
+  let rows = []; // {id,text,type,sel,note}
 
   function uid(){return Math.random().toString(36).slice(2)}
   function escapeHtml(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
   function today(){return new Date().toISOString().slice(0,10)}
 
-  // تلميح المرحلة
+  // Phase hints
   const PHINT = {
     client_init: 'المرحلة (١): يقوم العميل بإدخال بيانات الموقع واسم/إيميل المدقق ثم يرسل النموذج للمدقق عبر الإيميل أو الواتساب.',
     auditor_action: 'المرحلة (٢): المدقق يراجع البنود ويعبّئ الحقول (✔/✖ أو 1–5) ثم يعيد الإرسال إلى العميل.',
     client_approve: 'المرحلة (٣): العميل يراجع نتيجة التدقيق ويعتمدها ثم يرسل النسخة النهائية إلى المصمم.'
   };
 
-  // أنواع التقييم
+  // Types
   const TYPE_TXT = { yesno: '✔/✖', scale: '1–5', note: 'ملاحظة فقط' };
 
-  // قِيَم افتراضية
+  // Defaults
   els.fDate.value = today();
 
-  // رسم صف
+  function inputForType(type, idx, sel){
+    if(type==='yesno'){
+      const ok = sel==='ok'? 'checked':''; const no = sel==='no'? 'checked':'';
+      return `<label style="margin-inline:6px"><input type="radio" name="r${idx}" value="ok" ${ok}> ✔</label>
+              <label style="margin-inline:6px"><input type="radio" name="r${idx}" value="no" ${no}> ✖</label>`;
+    } else if(type==='scale') {
+      const opts = ['','1','2','3','4','5'].map(v=>`<option ${sel===v?'selected':''}>${v}</option>`).join('');
+      return `<select class="scaleSel" data-idx="${idx}">${opts}</select>`;
+    }
+    return '<span class="muted">—</span>';
+  }
+
   function makeRow(r,i){
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -155,18 +167,6 @@
     return tr;
   }
 
-  function inputForType(type, idx, sel){
-    if(type==='yesno'){
-      const ok = sel==='ok'? 'checked':''; const no = sel==='no'? 'checked':'';
-      return `<label style="margin-inline:6px"><input type="radio" name="r${idx}" value="ok" ${ok}> ✔</label>
-              <label style="margin-inline:6px"><input type="radio" name="r${idx}" value="no" ${no}> ✖</label>`;
-    } else if(type==='scale') {
-      const opts = ['','1','2','3','4','5'].map(v=>`<option ${sel===v?'selected':''}>${v}</option>`).join('');
-      return `<select class="scaleSel" data-idx="${idx}">${opts}</select>`;
-    }
-    return '<span class="muted">—</span>';
-  }
-
   function render(){
     els.tbody.innerHTML='';
     const frag = document.createDocumentFragment();
@@ -176,7 +176,6 @@
 
   function addRow(text){ rows.push({id:uid(), text:text||'', type:'yesno', sel:'', note:''}); render(); persist(); }
 
-  // حفظ واسترجاع
   function collectMeta(){
     return {
       company: els.fCompany.value, site: els.fSite.value, desc: els.fDesc.value,
@@ -205,7 +204,7 @@
 
   function updatePhaseHint(){ els.phaseHint.textContent = PHINT[els.phaseSel.value]||'' }
 
-  // أحداث الجدول
+  // Table events
   els.tbody.addEventListener('input', e=>{
     if(e.target.classList.contains('txt')){
       const id=e.target.dataset.id; const r=rows.find(x=>x.id===id); if(r){ r.text=e.target.innerText.trim(); persist(); }
@@ -229,7 +228,7 @@
   els.addRow.onclick = ()=> addRow('* بند جديد');
   els.clearRows.onclick = ()=>{ if(confirm('مسح كل البنود؟')){ rows=[]; render(); persist(); } };
 
-  // مشاركة
+  // Title & summary
   function buildTitle(){
     const m=collectMeta();
     return `${m.company||'-'} | باب ${m.gateNo||'-'} – ${m.gateName||''} | ${m.date||''}`;
@@ -262,9 +261,16 @@
 
   els.copySummary.onclick = ()=>{
     const txt = summaryText();
-    navigator.clipboard && navigator.clipboard.writeText(txt).then(()=>{ alert('تم نسخ الملخص للنقل') }).catch(()=>{ alert('تعذر النسخ تلقائيًا — انسخ يدويًا') });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(()=> alert('تم نسخ الملخص للنقل')).catch(()=>{
+        prompt('انسخ الملخص يدويًا:', txt);
+      });
+    } else {
+      prompt('انسخ الملخص يدويًا:', txt);
+    }
   };
 
+  // Export HTML (includes same logo path)
   function exportHTML(){
     const m=collectMeta();
     const rowsHtml = rows.map((r,i)=>{
@@ -276,7 +282,7 @@
       return `<tr><td style="text-align:center">${i+1}</td><td>${escapeHtml(r.text||'')}</td><td style="text-align:center">${typeTxt}</td>${field}<td>${escapeHtml(r.note||'')}</td></tr>`;
     }).join('');
 
-    const brandTop = `<div style="text-align:end"><img alt="Ergonomic Industrial" src="Arkonomic Industrial Safety-0411.png" style="height:48px"></div>`;
+    const brandTop = `<div style="text-align:end"><img alt="Ergonomic Industrial" src="brand.png" style="height:48px"></div>`;
     const footer = `<div style="margin-top:14px;padding:10px 12px;border-top:1px solid #e5e7eb;color:#334155;font-size:12px;text-align:center">
       <div>Ergonomic Industrial — <a href="https://ergonomicindustrial.com" target="_blank">ergonomicindustrial.com</a></div>
       <div>Email: <a href="mailto:ergonomicindustrial@gmail.com">ergonomicindustrial@gmail.com</a> | Phone/WhatsApp: 67756743</div>
@@ -292,16 +298,26 @@
     </div></div></body></html>`;
 
     const fname = suggestFileName()+'.html';
-    const blob=new Blob([html],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=fname; a.click(); URL.revokeObjectURL(url);
+    const blob=new Blob([html],{type:'text/html'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
   }
 
   function suggestFileName(){
     const m=collectMeta();
     const sanitize = s=>String(s||'').trim().replace(/\s+/g,'-').replace(/[^\w\-]/g,'');
-    return [sanitize(m.company||'Client'),sanitize(m.site||'Site'),`G${sanitize(m.gateNo||'0')}`, (m.date||today())].filter(Boolean).join('_');
+    return [sanitize(m.company||'Client'),sanitize(m.site||'Site'),`G${sanitize(m.gateNo||'0')}`,(m.date||today())].filter(Boolean).join('_');
   }
 
-  // إرسال حسب المرحلة
+  // ✅ WhatsApp helper: digits only to avoid 404
+  function waLink(text, phoneRaw){
+    const phone = String(phoneRaw||'').replace(/[^\d]/g,''); // keep digits only
+    if(!phone){ return null; }
+    return 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text||'');
+  }
+
+  // Share by phase
   function shareByPhase(){
     const m=collectMeta();
     if(!m.company || !m.site || !m.auditorName){ alert('رجاءً أكمل: الشركة / الموقع / اسم المدقق'); return; }
@@ -311,24 +327,27 @@
 
     if(els.phaseSel.value==='client_init'){
       // إلى المدقق
-      const to = m.auditorMail||'';
-      if(to){ window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; }
-      if(m.auditorPhone){ const wa = 'https://wa.me/'+ encodeURIComponent(m.auditorPhone.replace(/\s+/g,'')) +'?text='+ encodeURIComponent(body); window.open(wa,'_blank'); }
+      const to = (m.auditorMail||'').trim();
+      if(to){ window.location.href = 'mailto:' + to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body); }
+      const wa = waLink(body, m.auditorPhone);
+      if(wa){ window.open(wa,'_blank'); }
     }
     else if(els.phaseSel.value==='auditor_action'){
       // إلى العميل
-      if(m.clientMail){ window.location.href = `mailto:${encodeURIComponent(m.clientMail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; }
-      if(m.auditorPhone){ const wa = 'https://wa.me/'+ encodeURIComponent(m.auditorPhone.replace(/\s+/g,'')) +'?text='+ encodeURIComponent('تم استكمال التدقيق\n\n'+body); window.open(wa,'_blank'); }
+      const to = (m.clientMail||'').trim();
+      if(to){ window.location.href = 'mailto:' + to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body); }
+      const wa = waLink('تم استكمال التدقيق\n\n' + body, m.auditorPhone);
+      if(wa){ window.open(wa,'_blank'); }
     }
     else if(els.phaseSel.value==='client_approve'){
-      // إلى المصمم (بريد المستخدم الذي طلبه)
-      const to = `${DESIGNER_EMAIL_FINAL}`;
-      window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      // إلى المصمم
+      const to = DESIGNER_EMAIL_FINAL;
+      window.location.href = 'mailto:' + to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     }
   }
 
-  // ربط الأحداث العامة
-  ;['input','change'].forEach(ev=>{
+  // Bind general events
+  ['input','change'].forEach(ev=>{
     ['fCompany','fSite','fDesc','fGateNo','fGateName','fDate','fAuditorName','fAuditorMail','fAuditorPhone','fClientMail','phaseSel']
     .forEach(id=>{ const el = els[id]; el && el.addEventListener(ev, ()=>{ if(id==='phaseSel') updatePhaseHint(); persist(); }) })
   });
@@ -337,12 +356,16 @@
   els.shareAction.onclick = shareByPhase;
   els.printBtn.onclick = ()=> window.print();
 
-  // لصق نص فقط داخل خلايا البند
+  // Paste as plain text within editable cells
   els.tbody.addEventListener('paste', e=>{
-    if(e.target.classList.contains('txt')){ e.preventDefault(); const text=(e.clipboardData||window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text); }
+    if(e.target.classList.contains('txt')){
+      e.preventDefault();
+      const text=(e.clipboardData||window.clipboardData).getData('text/plain');
+      document.execCommand('insertText', false, text);
+    }
   });
 
-  // تهيئة أولية
+  // Init
   function seed(){ if(rows.length) return; ['* التأكد من نظافة الموقع','* فحص معدات الإطفاء','* تدريب العاملين على المخاطر','* سلامة التمديدات الكهربائية'].forEach(t=> addRow(t)); }
   function init(){ restore(); if(!rows.length) seed(); render(); updatePhaseHint(); }
   init();
